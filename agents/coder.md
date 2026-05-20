@@ -58,12 +58,30 @@ Set `status: escalate, escalate_to: planner` if:
 
 ## Handoff log
 
-Write to `{workflow-dir}/run-{ts}/coder.md`:
+Write to `{workflow-dir}/run-{ts}/coder.md`.
+
+**Part 1 — JSON front-matter (dispatcher reads this only):**
+
+```json
+{
+  "agent": "coder",
+  "ts": "{ISO-timestamp}",
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": null,
+  "escalate_reason": null,
+  "files_touched": [],
+  "log_path": "{workflow-dir}/run-{ts}/coder.md"
+}
+```
+
+Append `---` then:
+
+**Part 2 — Narrative:**
 
 ```markdown
 # coder @ {ISO-timestamp}
-status: done | handover | escalate
-certainty: sure | unsure | dont-know
 
 ## did
 - <1-line bullet per file written/modified>
@@ -80,15 +98,21 @@ certainty: sure | unsure | dont-know
 <first thing the receiving agent should do>
 ```
 
+## Response to orchestrator
+
+Output ONLY the handoff-payload block below — nothing before it. All narrative about what you did goes into the handoff file, not here. The orchestrator does not read your response content.
+
 At the end of your response, output:
 
-```
 ## handoff-payload
-status: done | escalate
-certainty: sure | unsure | dont-know
-escalate: true | false
-escalate_to: planner | none
-escalate_reason: <reason or "none">
-files_touched: [list]
-log_path: {workflow-dir}/run-{ts}/coder.md
+```json
+{
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": "planner | null",
+  "escalate_reason": null,
+  "files_touched": [],
+  "log_path": "{workflow-dir}/run-{ts}/coder.md"
+}
 ```

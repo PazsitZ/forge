@@ -108,12 +108,30 @@ Escalate back to the user (set `certainty: unsure`) if:
 
 ## Handoff log
 
-Write to `{workflow-dir}/run-{ts}/planner.md` using this exact format:
+Write to `{workflow-dir}/run-{ts}/planner.md`.
+
+**Part 1 — JSON front-matter (dispatcher reads this only):**
+
+```json
+{
+  "agent": "planner",
+  "ts": "{ISO-timestamp}",
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": null,
+  "escalate_reason": null,
+  "plan_path": "{workflow-dir}/run-{ts}/plan.md",
+  "log_path": "{workflow-dir}/run-{ts}/planner.md"
+}
+```
+
+Append `---` then:
+
+**Part 2 — Narrative:**
 
 ```markdown
 # planner @ {ISO-timestamp}
-status: done | handover | escalate
-certainty: sure | unsure | dont-know
 
 ## did
 - <1-line bullet per action>
@@ -130,14 +148,21 @@ certainty: sure | unsure | dont-know
 <first thing the receiving agent should do>
 ```
 
+## Response to orchestrator
+
+Output ONLY the handoff-payload block below — nothing before it. All narrative about what you did goes into the handoff file, not here. The orchestrator does not read your response content.
+
 At the end of your response, output this block so the dispatcher can parse it:
 
-```
 ## handoff-payload
-status: done | escalate
-certainty: sure | unsure | dont-know
-escalate: true | false
-escalate_reason: <reason or "none">
-plan_path: {workflow-dir}/run-{ts}/plan.md
-log_path: {workflow-dir}/run-{ts}/planner.md
+```json
+{
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": null,
+  "escalate_reason": null,
+  "plan_path": "{workflow-dir}/run-{ts}/plan.md",
+  "log_path": "{workflow-dir}/run-{ts}/planner.md"
+}
 ```

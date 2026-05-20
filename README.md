@@ -1,6 +1,6 @@
-# Forge
+# Forge 
 
-**Structured, multi-agent development pipeline for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
+**Structured, multi-agent development pipeline for
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -9,6 +9,7 @@
 A drop-in set of Claude Code agent definitions and a slash command that turn a task description
 into reviewed, tested code — with human approval gates at each major stage.
 Language and framework agnostic. Configurable for any project via five placeholders.
+(Applicable for any other agentic tool with the correct placing of agents skill and command.)
 
 ```
 idea or plan doc
@@ -25,7 +26,7 @@ idea or plan doc
        │
   [test-writer]
        │
-   [docs stage]
+  [docs writer]
        │
      done
 ```
@@ -52,6 +53,7 @@ source bugs before they reach you.
      agents/
        coder.md
        dispatcher.md
+       docs-writer.md
        planner.md
        qa-reviewer.md
        researcher.md
@@ -73,10 +75,12 @@ source bugs before they reach you.
 ```
 /forge "add email notifications when a job finishes"
 /forge docs/plans/my-feature.md
+/forge {workflow-dir}/run-20260516-125849
 ```
 
 The first form interviews you to clarify scope, then plans and builds.
 The second form reads an existing plan document and picks up from there.
+The third form resumes an aborted run — the pipeline re-enters at the most advanced completed stage.
 
 ---
 
@@ -94,7 +98,7 @@ The second form reads an existing plan document and picks up from there.
 | ✋ | *approval gate* | You review findings before tests are written |
 | 4 | **test-writer** | Writes and runs tests; escalates source bugs to coder |
 | — | **dispatcher** | Confirms pass or routes back |
-| 5 | *(orchestrator)* | Writes a changelog entry in `{changelog-dir}` |
+| 5 | **docs-writer** | Writes a changelog entry in `{changelog-dir}` |
 
 **Researcher** is a read-only sub-agent dispatched on demand by the planner and coder to
 answer specific codebase questions without polluting their context.
@@ -137,12 +141,13 @@ See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for 
 agents/
   coder.md          writes code, never test files
   dispatcher.md     routing brain — read-only, no file writes
+  docs-writer.md    writes changelog entry, never modifies source files
   planner.md        produces plan.md from task or existing doc
   qa-reviewer.md    reviews code, writes review-findings.md
   researcher.md     read-only codebase explorer, discarded context
   test-writer.md    writes and runs tests, escalates source bugs
 commands/
-  forge.md the /forge slash command orchestrator
+  forge.md          /forge slash command orchestrator
 bootstrap.md        placeholder guide for setting up a new project
 ```
 

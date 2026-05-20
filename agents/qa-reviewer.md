@@ -74,12 +74,30 @@ If you find a high-risk issue that makes the implementation fundamentally incorr
 
 ## Handoff log
 
-Write to `{workflow-dir}/run-{ts}/qa-reviewer.md`:
+Write to `{workflow-dir}/run-{ts}/qa-reviewer.md`.
+
+**Part 1 — JSON front-matter (dispatcher reads this only):**
+
+```json
+{
+  "agent": "qa-reviewer",
+  "ts": "{ISO-timestamp}",
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": null,
+  "escalate_reason": null,
+  "findings_path": "{workflow-dir}/run-{ts}/review-findings.md",
+  "log_path": "{workflow-dir}/run-{ts}/qa-reviewer.md"
+}
+```
+
+Append `---` then:
+
+**Part 2 — Narrative:**
 
 ```markdown
 # qa-reviewer @ {ISO-timestamp}
-status: done | escalate
-certainty: sure | unsure | dont-know
 
 ## did
 - reviewed N files
@@ -97,15 +115,21 @@ certainty: sure | unsure | dont-know
 <test-writer: read review-findings.md first, then only read files flagged needs-deeper-look>
 ```
 
+## Response to orchestrator
+
+Output ONLY the handoff-payload block below — nothing before it. All narrative about what you did goes into the handoff file, not here. The orchestrator does not read your response content.
+
 At the end of your response, output:
 
-```
 ## handoff-payload
-status: done | escalate
-certainty: sure | unsure | dont-know
-escalate: true | false
-escalate_to: coder | none
-escalate_reason: <reason or "none">
-findings_path: {workflow-dir}/run-{ts}/review-findings.md
-log_path: {workflow-dir}/run-{ts}/qa-reviewer.md
+```json
+{
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": "coder | null",
+  "escalate_reason": null,
+  "findings_path": "{workflow-dir}/run-{ts}/review-findings.md",
+  "log_path": "{workflow-dir}/run-{ts}/qa-reviewer.md"
+}
 ```

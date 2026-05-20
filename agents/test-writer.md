@@ -56,12 +56,31 @@ If tests fail:
 
 ## Handoff log
 
-Write to `{workflow-dir}/run-{ts}/test-writer.md`:
+Write to `{workflow-dir}/run-{ts}/test-writer.md`.
+
+**Part 1 — JSON front-matter (dispatcher reads this only):**
+
+```json
+{
+  "agent": "test-writer",
+  "ts": "{ISO-timestamp}",
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": null,
+  "escalate_reason": null,
+  "test_files": [],
+  "test_result": "pass | fail",
+  "log_path": "{workflow-dir}/run-{ts}/test-writer.md"
+}
+```
+
+Append `---` then:
+
+**Part 2 — Narrative:**
 
 ```markdown
 # test-writer @ {ISO-timestamp}
-status: done | escalate
-certainty: sure | unsure | dont-know
 
 ## did
 - wrote tests/{module}/test_{file}
@@ -79,16 +98,22 @@ certainty: sure | unsure | dont-know
 <coder: fix [specific issue at file:line] — omit if status=done>
 ```
 
+## Response to orchestrator
+
+Output ONLY the handoff-payload block below — nothing before it. All narrative about what you did goes into the handoff file, not here. The orchestrator does not read your response content.
+
 At the end of your response, output:
 
-```
 ## handoff-payload
-status: done | escalate
-certainty: sure | unsure | dont-know
-escalate: true | false
-escalate_to: coder | none
-escalate_reason: <source bug description or "none">
-test_files: [list]
-test_result: pass | fail
-log_path: {workflow-dir}/run-{ts}/test-writer.md
+```json
+{
+  "status": "done | escalate",
+  "certainty": "sure | unsure | dont-know",
+  "escalate": false,
+  "escalate_to": "coder | null",
+  "escalate_reason": null,
+  "test_files": [],
+  "test_result": "pass | fail",
+  "log_path": "{workflow-dir}/run-{ts}/test-writer.md"
+}
 ```

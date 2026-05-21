@@ -185,6 +185,9 @@ bootstrap.md        placeholder guide for setting up a new project
 
 ---
 
+## Docs
+> Evolution of the pipeline and explanation of decision summarized here: [Building an Agentic Dev Pipeline — From Ad-Hoc Prompting to a Repeatable Protocol](https://dev.pazsitz.hu/building-an-agentic-dev-pipeline-from-ad-hoc-prompting-to-a-repeatable-protocol/)
+
 ## Acknowledgements
 
 The `grill-me` skill (`commands/grill-me/skill.md`) is taken from

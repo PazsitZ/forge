@@ -1,12 +1,12 @@
 # Forge 
 
-**Structured, multi-agent development pipeline for
+**Structured, multi-agent development pipeline
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-A drop-in set of Claude Code agent definitions and a slash command that turn a task description
+A drop-in set of Claude Code / CoPilot agent definitions and a slash command that turn a task description
 into reviewed, tested code — with human approval gates at each major stage.
 Language and framework agnostic. Configurable for any project via five placeholders.
 (Applicable for any other agentic tool with the correct placing of agents skill and command.)
@@ -39,13 +39,14 @@ source bugs before they reach you.
 
 ## Requirements
 
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (any recent version)
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)  / CoPilot (any recent version)
 - A project with a `CLAUDE.md` at its root
 
 ---
 
 ## Installation
 
+### Claude
 1. Copy the `agents/`, `commands/`, and `bootstrap.md` into your project's `.claude/` directory:
 
    ```
@@ -59,14 +60,38 @@ source bugs before they reach you.
        researcher.md
        test-writer.md
      commands/
+		grill-me/
+	     skill.md
        forge.md
+     bootstrap.md          ← fill this in first
+   ```
+
+### CoPilot
+1. Copy the `agents/`, copy `commands/forge.md` -> `agents/`, copy `commands/grill-me` -> `skills/`, copy `prompts/`, and `bootstrap.md` into your project's `.github/` directory:
+
+   ```
+   .github/
+     agents/
+       coder.md
+       dispatcher.md
+       docs-writer.md
+       forge.md
+	   planner.md
+       qa-reviewer.md
+       researcher.md
+       test-writer.md
+     prompts/
+       forge.prompt.md
+	 skills/
+	   grill-me/
+	     skill.md
      bootstrap.md          ← fill this in first
    ```
 
 2. Open `bootstrap.md` with your LLM and fill in the five project-level placeholders.
    The guide walks through each one and tells you what to remove if a concept doesn't apply.
 
-3. Run `/forge` inside Claude Code.
+3. Run `/forge` inside your coding agent.
 
 ---
 
@@ -147,6 +172,8 @@ agents/
   researcher.md     read-only codebase explorer, discarded context
   test-writer.md    writes and runs tests, escalates source bugs
 commands/
+  grill-me/
+    skill.md		mattpocock/skills used for interviewing
   forge.md          /forge slash command orchestrator
 bootstrap.md        placeholder guide for setting up a new project
 ```

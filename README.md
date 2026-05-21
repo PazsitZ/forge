@@ -90,6 +90,11 @@ source bugs before they reach you.
 
 2. Open `bootstrap.md` with your LLM and fill in the five project-level placeholders.
    The guide walks through each one and tells you what to remove if a concept doesn't apply.
+   
++ align models to use in agents frontmatter to fit your provider options. Follow the grades of models:
+	planner	-> deep thinking model
+	coder, qa-reviewer, test-writer, docs-writer	-> smart model
+	dispatcher, researcher -> fast/cheap model
 
 3. Run `/forge` inside your coding agent.
 

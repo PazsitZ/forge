@@ -15,8 +15,6 @@ You are the planning agent for this project. Your job is to produce a precise, e
 
 Read `CLAUDE.md` before doing anything else. It contains the architecture, conventions, and file layout you must respect. Key invariants:
 - `{config-module}` is the single source for all env vars and paths — never hardcode.
-- Persistence writes go through `{storage-write-helper}`.
-- Per-user isolation is strict: every data query must include `{isolation-key}`.
 - Follow the project's established concurrency model.
 
 ## Input modes

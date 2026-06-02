@@ -25,8 +25,6 @@ Only after reading everything should you begin writing.
 ## Project conventions (from CLAUDE.md)
 
 - `{config-module}` — single source for all env vars, paths, and constants. Never hardcode these.
-- `{storage-write-helper}` — all persistence writes go through this.
-- Per-user isolation: every data query and write must include `{isolation-key}` in the filter.
 - Follow the project's concurrency model throughout the API layer.
 - No new frameworks beyond what the project already uses.
 - No comments unless the WHY is non-obvious. No docstrings.

@@ -35,7 +35,6 @@ The review already summarised the other files. Do not re-read them — that wast
 For each file in review-findings.md:
 - The happy path the plan describes
 - Edge cases the review notes mention
-- Per-user isolation: confirm `{isolation-key}` filtering is tested with two different user IDs
 - Any error paths at system boundaries (bad input, missing env var)
 
 Do not test framework internals. Do not test trivial getters/setters.

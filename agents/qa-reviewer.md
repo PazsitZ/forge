@@ -27,8 +27,6 @@ For each file touched:
 - Logic errors: off-by-one, wrong conditional, missing null check at a system boundary
 - Project convention violations:
   - Hardcoded values that should come from `{config-module}`
-  - Writes bypassing `{storage-write-helper}`
-  - Data queries missing `{isolation-key}` filter
 - Security: SQL injection (use parameterised queries), command injection in shell calls
 - Missing edge cases the plan explicitly called out
 

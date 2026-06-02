@@ -40,55 +40,6 @@ agent's convention section and describe the actual pattern in `CLAUDE.md`.
 
 ---
 
-### `{storage-write-helper}`
-
-**Used in:** `agents/coder.md`, `agents/planner.md`, `agents/qa-reviewer.md`
-
-**What it represents:**
-A specific function or utility that all persistence writes must go through — providing
-atomicity, validation, auditing, or conflict safety. Agents will flag any writes that bypass
-it as convention violations.
-
-**Guidance:**
-Use `path/to/file:FunctionName` format. If multiple helpers exist for different storage
-backends, pick the most critical one (usually the one handling the source-of-truth store)
-and list others in `CLAUDE.md`.
-
-| Example | Meaning |
-|---------|---------|
-| `storage/vault.py:atomic_write()` | Atomic markdown file writer |
-| `db/repository.ts:upsert()` | Centralised DB write |
-| `lib/store.go:SafeWrite` | Write-with-lock helper |
-
-**If not applicable:** Writes are decentralised by design. Remove the `{storage-write-helper}`
-bullet from each agent's convention section.
-
----
-
-### `{isolation-key}`
-
-**Used in:** `agents/coder.md`, `agents/planner.md`, `agents/qa-reviewer.md`, `agents/test-writer.md`
-
-**What it represents:**
-The field that scopes every data query and write to a specific user or tenant. Agents treat
-any query missing this field as a bug. The test-writer will generate tests confirming
-isolation works across two distinct values.
-
-**Guidance:**
-Use the exact field name as it appears in your data layer.
-
-| Example | Context |
-|---------|---------|
-| `user_id` | Per-user isolation |
-| `tenant_id` | Multi-tenant SaaS |
-| `org_id` | Org-scoped data |
-| `account_id` | Account-level partitioning |
-
-**If not applicable:** Single-user or single-tenant system with no data isolation requirement.
-Remove the `{isolation-key}` lines from all agent convention sections.
-
----
-
 ### `{workflow-dir}`
 
 **Used in:** `commands/forge.md`, `agents/planner.md`, `agents/coder.md`, `agents/qa-reviewer.md`, `agents/test-writer.md`
@@ -160,8 +111,8 @@ automatically at runtime. No action needed — listed here for reference.
 
 Typical session with an LLM:
 
-1. **Give the LLM this file and your project's `CLAUDE.md`.**
-   Ask: *"Read bootstrap.md and CLAUDE.md. For each project-level placeholder,
+1. **Give the LLM this file and your project's `CLAUDE.md` / `copilot-instructions.md`.**
+   Ask: *"Read bootstrap.md and project relavant .md. For each project-level placeholder,
    ask me one question at a time until you have a value or a 'not applicable' decision."*
 
 2. **For each placeholder the LLM surfaces,** provide either:
@@ -176,7 +127,6 @@ Typical session with an LLM:
 4. **Review the results.** Spot-check that:
    - Every `{...}` token is gone from agent files (except runtime tokens)
    - Removed sections make sense (no dangling references)
-   - `CLAUDE.md` documents the chosen values under a conventions section
 
 5. **Optional:** If your project uses a different test layout, update the path template in
    `agents/test-writer.md` under "Test conventions" to match.

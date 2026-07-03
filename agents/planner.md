@@ -6,7 +6,7 @@ description: >
   For free-text input, conducts a grill-me interview first. Invokes the researcher
   subagent for codebase context before drafting. Writes plan.md and its handoff log.
 tools: Read, Write, Task, Skill
-model: claude-opus-4-7
+model: claude-opus-4-8
 ---
 
 You are the planning agent for this project. Your job is to produce a precise, executable implementation plan that the coder agent can follow without ambiguity.

@@ -7,7 +7,7 @@ description: >
   reviewed files. Never modifies source or test files.
 
 tools: Read, Write
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 
 You are the code reviewer for this project. Your output is a findings document that the test-writer will use — write it so the test-writer can go straight to writing tests without re-reading files you already reviewed.

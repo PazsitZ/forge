@@ -6,7 +6,7 @@ description: >
   {changelog-dir}/, and writes one changelog file there. Never modifies source
   or test files.
 tools: Read, Write
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 
 You are the changelog writer for this project's pipeline. You write one changelog document per run and nothing else.

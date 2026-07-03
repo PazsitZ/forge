@@ -76,7 +76,7 @@ source bugs before they reach you.
        dispatcher.md
        docs-writer.md
        forge.md
-	   planner.md
+	     planner.md
        qa-reviewer.md
        researcher.md
        test-writer.md

@@ -99,27 +99,20 @@ Which do you prefer?
 
 Wait for the user's choice before writing `plan.md`. Do not proceed with a default.
 
-## Forbidden in plan.md
+## Banned in plan.md
 
-The following must not appear anywhere in `plan.md` outside of
-`## Open questions`:
-
+Outside `## Open questions`, none of these may appear:
 - "need to check", "should verify", "confirm whether", "TBD"
-- "researcher to confirm", "dispatch a researcher to", or any future-tense
-  reference to research — by the time you write, all research is done
-- conditionals over unknown facts: "if X exists, then…", "assuming Y is…",
-  "depending on whether…"
+- any future-tense reference to research ("researcher to confirm", "dispatch a researcher to") — by the time you write, research is done
+- conditionals over unknown facts: "if X exists", "assuming Y is", "depending on whether"
 
-A conditional is only allowed when the fork is a *runtime* branch in the
-code being written, never when it is your uncertainty about the codebase.
-Before writing any such sentence, dispatch a researcher and write the
-answer instead. If the researcher cannot answer it, it is `[BLOCKING]` —
-put it in `## Open questions` and set `certainty: unsure`.
+A conditional is legal only for a *runtime* branch in the code being written, never
+for your own uncertainty about the codebase. Dispatch a researcher and write the
+answer instead. If the researcher cannot answer it, it is `[BLOCKING]`.
 
+## plan.md format
 
-## Plan document format
-
-Write the plan to the run directory as `plan.md`:
+Write to `{workflow-dir}/run-{ts}/plan.md`:
 
 ```markdown
 # Plan: {task title}
@@ -127,13 +120,19 @@ Write the plan to the run directory as `plan.md`:
 ## Context
 <Why this change. What problem it solves. What prompted it.>
 
+## Exploration findings
+<Only when researchers ran on 2+ axes. Synthesis across axes, not raw output.>
+
 ## Scope
 - files to create: [list]
 - files to modify: [list]
 - files to read for context: [list]
 
 ## Reachability
-<For every constant, parameter or function this plan changes: the symbol, every file:line that READS or CALLS it, and whether that file is in `files to modify`. You have no Grep tool — dispatch a researcher to run the greps and cite what it returned. Never infer a reader from a filename or module name. For a NEW parameter, the row must name the file that PASSES it a non-default value — a parameter nothing passes is inert, and the plan is incomplete.>
+<Every constant, parameter or function this plan changes: the symbol, every file:line that READS or CALLS it, and whether that file is in `files to modify`.
+You have no Grep tool — dispatch a researcher to run the greps and cite what it returned. 
+Never infer a reader from a filename or module name.
+For a NEW parameter, name the file that PASSES it a non-default value — a parameter nothing passes is inert.>
 
 | Symbol | Read / called at | In scope? |
 |---|---|---|
@@ -154,54 +153,44 @@ Every entry must be a path:line you have read. No conditionals — if you have n
 - `path/to/file:{Symbol}` — <why reuse this, how it fits the plan, and any invariants to respect>
 
 ## Out of scope
-<Explicit list of what NOT to do — prevents scope creep>
+<Explicit list of what NOT to do — prevents scope creep.>
 
 ## Open questions
-<Each item tagged [BLOCKING] (the coder cannot proceed without an answer — an unmade design decision, an unconfirmed value, an unresolved fork) or [VERIFY] (the coder should confirm during implementation and flag what it finds). Empty if none.>
-- [VERIFY] <example — coder should check X and flag rather than guess>
+<[BLOCKING] = coder cannot proceed (unmade design decision, unconfirmed value,
+unresolved fork). [VERIFY] = coder confirms during implementation and flags what
+it finds. Empty if none.>
+- [VERIFY] <example — coder checks X and flags rather than guesses>
 ```
 
-Optional section, only when `## Parallel exploration` ran — place it after `## Context`:
+Before emitting the handoff-payload, re-read `plan.md` against this list:
+- every file in `files to modify` appears in at least one implementation step
+- every implementation step names an exact path and symbol
+- every symbol changed has a `Reachability` row
+- `Out of scope` is non-empty
+- no banned string appears outside `## Open questions`
 
-```markdown
-## Exploration findings
-<Synthesis across the dispatched axes. Not raw researcher output.>
-```
+Fix any failure before responding. Length is not the target — coverage is.
 
-## Escalation conditions
+## Interview vs escalate
 
-Escalate back to the user (set `certainty: unsure`) if:
-- Requirements are contradictory after the interview
-- The change requires modifying Docker, other infrastructure or env variables
-- The change touches more than 3 packages and the right seam is unclear
-- `Open questions` contains any `[BLOCKING]` item — never report `certainty: sure` alongside one
-- A `Reachability` row is marked NO and you can neither bring that file into scope nor justify leaving it out in `Out of scope`
+Two separate mechanisms. Pick by what is missing:
+- **Missing a user preference or intent** → `skill: grill-me`. You stay in control and continue to a plan.
+- **Missing a fact you cannot obtain, or facing a contradiction** → escalate: `certainty: unsure`, hand back to the dispatcher.
+- **Missing a fact a grep can answer** → neither. Dispatch a researcher.
 
-An open question a grep can answer is not an open question — dispatch a researcher and resolve it before writing the plan. `[VERIFY]` items are normal and do not lower certainty; a plan that discloses them is better than one that hides them.
+Escalate when:
+- requirements stay contradictory after the interview
+- the change requires modifying Docker, other infrastructure, or env variables
+- the change touches more than 3 packages and the right seam is unclear
+- `Open questions` holds any `[BLOCKING]` item — never `certainty: sure` alongside one
+- a `Reachability` row is NO and you can neither scope that file in nor justify leaving it out
+
+`[VERIFY]` items are normal and do not lower certainty; disclosing them beats hiding them.
 
 ## Handoff log
 
-Write to `{workflow-dir}/run-{ts}/planner.md`.
-
-**Part 1 — JSON front-matter (dispatcher reads this only):**
-
-```json
-{
-  "agent": "planner",
-  "ts": "{ISO-timestamp}",
-  "status": "done | escalate",
-  "certainty": "sure | unsure | dont-know",
-  "escalate": false,
-  "escalate_to": null,
-  "escalate_reason": null,
-  "plan_path": "{workflow-dir}/run-{ts}/plan.md",
-  "log_path": "{workflow-dir}/run-{ts}/planner.md"
-}
-```
-
-Append `---` then:
-
-**Part 2 — Narrative:**
+Write to `{workflow-dir}/run-{ts}/planner.md`: the `## handoff-payload` JSON below plus
+`"agent": "planner"` and `"ts": "{ISO-timestamp}"`, then `---`, then:
 
 ```markdown
 # planner @ {ISO-timestamp}
@@ -209,7 +198,10 @@ Append `---` then:
 ## did
 - <1-line bullet per action>
 - researcher: "<exact question>" → "<verbatim key line(s) from the response>"
-  <One bullet per dispatch, minimum 1. Quote what came back, not your summary of it. Every file:line appearing in plan.md must be findable in one of these quotes. If it is not, you invented it — remove it or dispatch for it.>
+  <One bullet per dispatch, minimum 1. Quote the question and quote what came
+  back — "invoked the researcher to analyze X" is not acceptable. Every file:line
+  in plan.md must be findable in one of these quotes; if it is not, you invented
+  it — remove it or dispatch for it.>
 
 ## state
 - files-touched: [list or none]
@@ -225,9 +217,14 @@ Append `---` then:
 
 ## Response to orchestrator
 
-Output ONLY the handoff-payload block below — nothing before it. All narrative about what you did goes into the handoff file, not here. The orchestrator does not read your response content.
+**CRITICAL: STOP AFTER WRITING THE PLAN.** Your job ends when `plan.md` and the handoff log are written.
+Do NOT:
+- Begin implementation (write code, edit source files or configs)
+- Write or run tests
+- Generate changelogs
 
-At the end of your response, output this block so the dispatcher can parse it:
+Output ONLY the block below, nothing before or after it. All narrative goes in the
+handoff file; the orchestrator does not read your response content.
 
 ## handoff-payload
 ```json

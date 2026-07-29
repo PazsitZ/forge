@@ -63,9 +63,22 @@ Invoke the **planner** subagent:
 
 > Task: "Run in doc-first mode. The existing plan document is at: `$ARGUMENTS`. Run directory: `{workflow-dir}/run-{ts}/`. Read the plan, invoke the researcher subagent to verify file paths and symbols, then write plan.md (structured version) and your handoff log to the run directory."
 
+After the planner finishes, validate the plan artifact:
+
+> Task: "Validate the plan at `{workflow-dir}/run-{ts}/plan.md` against the planner contract. 
+> Check: (1) all required sections present (Context, Scope, Reachability, Requirements, Implementation steps, Existing patterns to reuse, Out of scope, Open questions); 
+> (2) Reachability table has rows and no rows are marked NO without justification; 
+> (3) Open questions has no [BLOCKING] items if certainty is 'sure';
+> (4) researcher dispatch is recorded in `planner.md` `## did`. 
+> Return a JSON block with `valid: true/false` and `problems: [...]`."
+
+If validation fails, present the problems to the user at the approval gate with a
+note that the plan does not meet the contract. Do not proceed to coder until the
+user approves despite the failure, or the planner revises.
+
 > **DISPATCHER REQUIRED** — this is your only permitted action after the agent returns.
 
-After the planner finishes, invoke the **dispatcher** subagent:
+After the planner finishes and artifact is validated, invoke the **dispatcher** subagent:
 
 > Task: "Read the planner handoff log at `{workflow-dir}/run-{ts}/planner.md`. Pipeline stage: post-planner. Available next agents: coder (if done), planner (if escalate). The log uses JSON front-matter — parse the JSON block at the top (before `---`). Return your dispatch-decision as a fenced JSON block."
 
@@ -75,7 +88,7 @@ After the planner finishes, invoke the **dispatcher** subagent:
 
 ### Plan approval gate (always runs — not certainty-gated)
 
-Read `.claude/workflow/run-{ts}/plan.md` and present it to the user in full. Then request approval using whichever tool is available — first match wins:
+Read `{workflow-dir}/run-{ts}/plan.md` and present it to the user in full. Then request approval using whichever tool is available — first match wins:
 
 1. **Claude Code** — invoke `AskUserQuestion`:
    - question: `"Plan ready for review — how would you like to proceed?"`
@@ -143,7 +156,7 @@ After qa-reviewer finishes, invoke the **dispatcher** subagent:
 
 ### Review approval gate (always runs — not certainty-gated)
 
-Read `.claude/workflow/run-{ts}/review-findings.md` and present it to the user in full. Then request approval using whichever tool is available — first match wins:
+Read `{workflow-dir}/run-{ts}/review-findings.md` and present it to the user in full. Then request approval using whichever tool is available — first match wins:
 
 1. **Claude Code** — invoke `AskUserQuestion`:
    - question: `"Review findings ready — how would you like to proceed?"`
@@ -162,7 +175,7 @@ Read `.claude/workflow/run-{ts}/review-findings.md` and present it to the user i
 **Act on the response:**
 - `approve` / Approve → continue to Stage 4
 - `fix` / Fix + instruction text → re-invoke coder:
-  > Task: "User-requested fix before testing. Instruction: `{instruction}`. Review findings: `.claude/workflow/run-{ts}/review-findings.md`. Coder handoff log: `.claude/workflow/run-{ts}/coder.md`. Apply the fix. Write an updated coder handoff log."
+  > Task: "User-requested fix before testing. Instruction: `{instruction}`. Review findings: `{workflow-dir}/run-{ts}/review-findings.md`. Coder handoff log: `{workflow-dir}/run-{ts}/coder.md`. Apply the fix. Write an updated coder handoff log."
   Then return to Stage 3.
 - `abort` / Abort → stop. Output: `pipeline aborted at review approval.`
 
@@ -236,6 +249,6 @@ logs:
 - `sure` → auto-route silently. Do not narrate the routing to the user. `unsure` or `dont-know` → always surface to the user before proceeding.
 - Maximum 3 escalation loops on any single stage before surfacing to the user regardless of certainty.
 - Prompt caching: preserve the order — always read static files before generating output.
-- **You are a router, not an implementer.** You never write code, tests, or documentation. Only help by invoke the appropriate agent instead.
+- **You are a router, not an implementer.** You never write code, tests, or documentation. If you feel the urge to help by doing an agent's work — invoke that agent instead.
 - Re-read the ORCHESTRATOR IDENTITY block at the top before every stage transition.
 - **USER INTERACTION**: Whenever you need user input (approval gates, `ask_user` dispatcher decisions, escalations), you MUST use the availabel tool: `AskUserQuestion` or `ask_questiuons` ** THis is the only reliable way to provide interactive prompt to the user to respond. 

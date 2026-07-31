@@ -14,7 +14,7 @@ Language and framework agnostic. Configurable for any project via five placehold
 ```
 idea or plan doc
        │
-   [planner]  ←── grill-me interview
+   [planner]  ←── interview-me Skill
        │
   approval gate ──► you
        │
@@ -60,14 +60,15 @@ source bugs before they reach you.
        researcher.md
        test-writer.md
      commands/
-		grill-me/
-	     skill.md
-       forge.md
+      forge.md
+       skills/
+      interview-me/
+       skill.md
      bootstrap.md          ← fill this in first
    ```
 
 ### CoPilot
-1. Copy the `agents/`, copy `commands/forge.md` -> `agents/`, copy `commands/grill-me` -> `skills/`, copy `prompts/`, and `bootstrap.md` into your project's `.github/` directory:
+1. Copy the `agents/`, copy `commands/forge.md` -> `agents/`, copy `skills/interview-me` -> `skills/`, copy `prompts/`, and `bootstrap.md` into your project's `.github/` directory:
 
    ```
    .github/
@@ -83,7 +84,7 @@ source bugs before they reach you.
      prompts/
        forge.prompt.md
 	 skills/
-	   grill-me/
+	   interview-me/
 	     skill.md
      bootstrap.md          ← fill this in first
    ```
@@ -177,9 +178,11 @@ agents/
   researcher.md     read-only codebase explorer, discarded context
   test-writer.md    writes and runs tests, escalates source bugs
 commands/
-  grill-me/
-    skill.md		mattpocock/skills used for interviewing
   forge.md          /forge slash command orchestrator
+skills/  
+  interview-me/
+    skill.md        Skill used for interviewing
+  
 bootstrap.md        placeholder guide for setting up a new project
 ```
 
@@ -187,15 +190,6 @@ bootstrap.md        placeholder guide for setting up a new project
 
 ## Docs
 > Evolution of the pipeline and explanation of decision summarized here: [Building an Agentic Dev Pipeline — From Ad-Hoc Prompting to a Repeatable Protocol](https://dev.pazsitz.hu/building-an-agentic-dev-pipeline-from-ad-hoc-prompting-to-a-repeatable-protocol/)
-
-## Acknowledgements
-
-The `grill-me` skill (`commands/grill-me/skill.md`) is taken from
-[mattpocock/skills](https://github.com/mattpocock/skills) and is used here unmodified.
-
-> MIT License — Copyright (c) 2026 Matt Pocock
-
-Full license: https://github.com/mattpocock/skills/blob/main/LICENSE
 
 ---
 

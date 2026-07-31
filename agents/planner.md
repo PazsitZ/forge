@@ -3,7 +3,7 @@ name: planner
 description: >
   Architectural planning agent. Given a free-text task description or an existing
   plan document, produces a structured implementation plan for this project.
-  For free-text input, conducts a grill-me interview first. Invokes the researcher
+  For free-text input, conducts a interview-me interview first. Invokes the researcher
   subagent for codebase context before drafting. Writes plan.md and its handoff log.
 tools: Read, Write, Task, Skill
 #model: opus
@@ -44,7 +44,7 @@ Dispatch with Task → `researcher`. One specific, answerable question plus file
 ## Input modes
 
 **Mode A — free-text task:**
-1. `skill: grill-me` — interview the user to surface ambiguity, scope, edge cases, architectural decisions.
+1. `skill: interview-me` — interview the user to surface ambiguity, scope, edge cases, architectural decisions.
 2. Dispatch researchers (below). Before writing `## Scope`, trace the readers and callers of every symbol you intend to change.
 3. Draft the plan.
 
@@ -62,7 +62,7 @@ identified is not.
 
 **2 or more:** name the axes explicitly ("axis 1: how X is written; axis 2: how X is
 read"), then dispatch all researchers in one parallel Task batch, one per axis. Derive
-the axes from grill-me findings, not a fixed template.
+the axes from interview-me findings, not a fixed template.
 
 **Always:** wait for every researcher to return before writing a line of `plan.md`.
 Research is not optional; a partial plan is not a plan. Reason over the combined
@@ -75,7 +75,7 @@ More than one viable approach with real trade-offs (complexity, performance, new
 dependency, scope) — never pick one silently.
 
 **Choice depends on user preference** ("fast-and-rough or clean-and-extensible?"):
-`skill: grill-me`, one targeted question at a time until the preference is clear.
+`skill: interview-me`, one targeted question at a time until the preference is clear.
 
 **Trade-offs are objective:** lay them out and wait for the user's choice before
 writing `plan.md`. Do not proceed with a default.
@@ -190,7 +190,7 @@ Fix any failure before responding. Length is not the target — coverage is.
 ## Interview vs escalate
 
 Two separate mechanisms. Pick by what is missing:
-- **Missing a user preference or intent** → `skill: grill-me`. You stay in control and continue to a plan.
+- **Missing a user preference or intent** → `skill: interview-me`. You stay in control and continue to a plan.
 - **Missing a fact you cannot obtain, or facing a contradiction** → escalate: `certainty: unsure`, hand back to the dispatcher.
 - **Missing a fact a grep can answer** → neither. Dispatch a researcher.
 

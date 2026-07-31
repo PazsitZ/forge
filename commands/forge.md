@@ -56,7 +56,7 @@ User provides a run directory (e.g. `{workflow-dir}/run-20260516-125849`):
 ### Idea-first mode
 Invoke the **planner** subagent:
 
-> Task: "Run in idea-first mode. The user's task description is: `$ARGUMENTS`. Run directory: `{workflow-dir}/run-{ts}/`. Use the Skill tool (skill: grill-me) to interview the user and clarify requirements, then invoke the researcher subagent for codebase context, then write plan.md and your handoff log to the run directory."
+> Task: "Run in idea-first mode. The user's task description is: `$ARGUMENTS`. Run directory: `{workflow-dir}/run-{ts}/`. Use the Skill tool (skill: interview-me) to interview the user and clarify requirements, then invoke the researcher subagent for codebase context, then write plan.md and your handoff log to the run directory."
 
 ### Doc-first mode
 Invoke the **planner** subagent:

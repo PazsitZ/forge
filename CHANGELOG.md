@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-07-30
+Replaced the `grill-me` skill to `interview-me`.
+Using similar basis as Matt Pocock's grill-me, but widely extended
+
 Notable changes to Forge. The planner agent carries its own contract version (`v0`–`v4`).
 
 `v2`–`v4` came out of a five-model comparison (Sonnet 5 plus three open-weight models,
@@ -48,7 +52,7 @@ Planner 1,878 → 1,476 words. Reorganised, not appended.
 **Changed**
 - `## Exploration findings` moved inside the fenced `plan.md` template (was below the fence under an "optional section" preamble, and got omitted).
 - `## Parallel exploration` + `## Researcher subagent` → merged into `## Researcher dispatch`.
-- `## Escalation conditions` → `## Interview vs escalate`, keyed on what is missing: preference → `grill-me`; unobtainable fact or contradiction → escalate; fact a grep answers → dispatch a researcher.
+- `## Escalation conditions` → `## Interview vs escalate`, keyed on what is missing: preference → `interview-me`; unobtainable fact or contradiction → escalate; fact a grep answers → dispatch a researcher.
 - `## Plan document format` → `## plan.md format`.
 
 **Fixed**

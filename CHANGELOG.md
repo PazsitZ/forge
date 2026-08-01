@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-01
+Added `design-doc` Skill. This produces a specific document, which can be inputted to the `forge` pipleine's planner.
+It creates a mid-high level design-doc. This produces a wider scopeddesign with additional components, discovering goals, options, risks and consequences.
+
 ## 2026-07-30
 Replaced the `grill-me` skill to `interview-me`.
 Using similar basis as Matt Pocock's grill-me, but widely extended

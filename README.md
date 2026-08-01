@@ -61,9 +61,11 @@ source bugs before they reach you.
        test-writer.md
      commands/
       forge.md
-       skills/
+     skills/
       interview-me/
-       skill.md
+       SKILL.md
+      design-doc/
+       SKILL.md
      bootstrap.md          ← fill this in first
    ```
 
@@ -85,7 +87,9 @@ source bugs before they reach you.
        forge.prompt.md
 	 skills/
 	   interview-me/
-	     skill.md
+	     SKILL.md
+     design-doc/
+       SKILL.md
      bootstrap.md          ← fill this in first
    ```
 
@@ -114,6 +118,13 @@ The second form reads an existing plan document and picks up from there.
 The third form resumes an aborted run — the pipeline re-enters at the most advanced completed stage.
 
 ---
+
+## Pre-design Phase
+
+| Stage | Skill | What it does |
+|-------|-------|-------------|
+| 0 | **design-doc** |  Creates a higher lev(el design document to be inputted into `forge` (and it's `planner` agent) |
+
 
 ## Pipeline stages
 
@@ -181,7 +192,9 @@ commands/
   forge.md          /forge slash command orchestrator
 skills/  
   interview-me/
-    skill.md        Skill used for interviewing
+    SKILL.md        Skill used for interviewing
+  design-doc/
+    SKILL.md
   
 bootstrap.md        placeholder guide for setting up a new project
 ```

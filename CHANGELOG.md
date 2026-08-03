@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-08-03 — harness self-improvement with lessons and memories
+
+Integrated learning system for Claude Code. Records lessons learned during development
+(corrections, self-caught mistakes, notable observations) and memories about the project
+(user preferences, feedback, project context). The `curate-learnings` skill periodically
+audits and consolidates these, archiving dead entries and promoting proven patterns into
+agent or user instructions.
+
+**Added**
+- `CLAUDE.learnings.md` — guidance for recording learning-worthy moments into
+  `{docs-dir}/lessons/lessons.md`. Defines four categories: user corrections, self-caught
+  mistakes, notable observations, and rules worth remembering.
+- `skills/curate-learnings/SKILL.md` — Five-stage curation workflow:
+  - Scan usage (read counts, last access) via `scan_usage.py` against a 30-day transcript window.
+  - Merge scan results into a durable ledger, tracking renames and deletions.
+  - Classify each item per `references/POLICY.md` thresholds and routing rules.
+  - Report candidate archives, merges, and promotions; ask for user approval per verdict group.
+  - Apply approved actions: move files to `archive/`, consolidate duplicates, promote proven
+    rules into `AGENTS.md` or global `CLAUDE.md`.
+- `references/LEDGER-FORMAT.md` — documents ledger schema, read counts, and deliberately
+  under-counted statistics.
+- `references/POLICY.md` — verdict table with age floors, read thresholds, merge clustering,
+  and routing rules (archive/compact/promote/merge).
+- `scripts/scan_usage.py` — reads recent transcript snapshots and ledger, measures usage
+  and last-read timestamp per lesson/memory file, emits under-counted read stats.
+- Detailed walkthrough article: `../Raz-pAI/docs/articles/20260725-make-your-harness-learn-from-its-mistakes.md`
+
+**Changed**
+- `CLAUDE.learnings.md` (this file) now also documents the feedback/project/reference memory
+  types and auto-memory mechanics, which were previously living-doc only.
+
+**When to use**
+- At session start for a known project: review `{docs-dir}/lessons/lessons.md` if it exists.
+- During or after work: update lessons when corrected, when you catch your own mistakes,
+  or when you observe a non-obvious gotcha or confirmed-good pattern worth remembering.
+- Periodically (suggested: monthly): run `/curate-learnings` to audit what was actually
+  read, merge redundant entries, and promote proven patterns.
+
 ## 2026-08-03 — design-doc closure
 
 The `docs-writer` closes out the design doc a run was started from, so a delivered document

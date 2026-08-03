@@ -141,7 +141,7 @@ The third form resumes an aborted run — the pipeline re-enters at the most adv
 | ✋ | *approval gate* | You review findings before tests are written |
 | 4 | **test-writer** | Writes and runs tests; escalates source bugs to coder |
 | — | **dispatcher** | Confirms pass or routes back |
-| 5 | **docs-writer** | Writes a changelog entry in `{docs-dir}/changes`, then syncs living docs in `{living-docs-dir}` |
+| 5 | **docs-writer** | Writes a changelog entry in `{docs-dir}/changes`, syncs living docs in `{living-docs-dir}`, closes out the source design doc |
 | — | **dispatcher** | Confirms the docs sync, or surfaces documents it would not edit unasked |
 
 **Researcher** is a read-only sub-agent dispatched on demand by the planner, coder, and
@@ -166,6 +166,23 @@ dated archive files, and `{docs-dir}/lessons/`. Todo entries are marked done, ne
 Every modification is recorded with file paths and pre-edit line ranges in
 `{workflow-dir}/run-{ts}/docs-updates.md` — written on every run, including runs that changed
 no documentation.
+
+### Design-doc closure
+
+When a run started from a design doc (`/forge {docs-dir}/todo/my-feature.md`), the planner
+records that path as `source_doc` and the docs-writer closes it out at the end. It checks the
+document's decisions, affected files, `[BLOCKING]` and `[VERIFY]` items, and the test result
+against what the run actually delivered:
+
+- **All delivered** → frontmatter gets `status: final` and a `completed:` date. If
+  `{docs-dir}/archive` exists, the document moves there; if not, it stays put — the directory
+  is never created for you.
+- **Partly delivered** → nothing is touched. The outstanding items are listed in
+  `docs-updates.md`. A large design doc consumed by several runs stays open on purpose.
+- **Ambiguous** → surfaced to you at the docs gate rather than decided.
+
+The document body is never rewritten and no frontmatter key other than `status` and
+`completed` is changed — a design doc records what was decided, not what was built.
 
 ---
 

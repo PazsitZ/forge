@@ -126,9 +126,9 @@ notes, setup and usage guides.
 **Note:** Do not include a trailing slash.
 
 **If not applicable:** Your project keeps no living documentation. Remove Part B (Living
-documentation sync) and Part C (Audit log) from `agents/docs-writer.md`, and in
-`commands/forge.md` drop the post-docs-writer dispatcher and the `living docs:` lines from
-the Final Summary.
+documentation sync), Part C (Design-doc closure) and Part D (Audit log) from
+`agents/docs-writer.md`, and in `commands/forge.md` drop the post-docs-writer dispatcher and
+the `living docs:` and `design doc:` lines from the Final Summary.
 
 ---
 
@@ -144,6 +144,7 @@ listed file(s) rather than introducing a new `{...}` token.
 | `{docs-dir}/changes` | `agents/docs-writer.md` | style-sample step in `agents/docs-writer.md` | Append-only changelog, one file per completed run. Never edited after the fact. |
 | `{docs-dir}/todo` | `skills/design-doc/SKILL.md` | `commands/forge.md` (doc-first mode input), `agents/docs-writer.md` (marks resolved entries done, never deletes) | Design/analysis documents awaiting a `/forge` run, and the open backlog. |
 | `{docs-dir}/lessons` | project-specific (not written by this pipeline) | — | The user's own record of what happened. Explicitly excluded from the docs-writer's living-doc sync — never edited or corrected retroactively. |
+| `{docs-dir}/archive` | `agents/docs-writer.md` (Part C4) | — | **Optional.** Design docs the pipeline has fully delivered, moved out of `{docs-dir}/todo` after being marked `status: final`. If the directory does not exist, the move is skipped — the docs-writer never creates it. Delete the directory to opt out of archiving. |
 
 `{living-docs-dir}` (see above) typically points at `{docs-dir}` itself, so the sync
 naturally treats `{docs-dir}/changes`, `{docs-dir}/lessons`, and `{workflow-dir}` as

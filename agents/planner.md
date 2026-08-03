@@ -52,6 +52,7 @@ Dispatch with Task → `researcher`. One specific, answerable question plus file
 1. Read it.
 2. Dispatch a researcher to verify every file path and symbol it references is still accurate.
 3. Restructure into the format below.
+4. Record its path as `source_doc` in your handoff payload. Leave the document itself untouched.
 
 ## Researcher dispatch
 
@@ -253,6 +254,10 @@ handoff file; the orchestrator does not read your response content.
   "escalate_to": null,
   "escalate_reason": null,
   "plan_path": "{workflow-dir}/run-{ts}/plan.md",
+  "source_doc": "{path to the input document in Mode B, or null in Mode A}",
   "log_path": "{workflow-dir}/run-{ts}/planner.md"
 }
 ```
+
+`source_doc` is the document you were handed, verbatim — the docs-writer uses it to close the
+design doc out at the end of the run. Never guess a path here: `null` in Mode A, always.

@@ -207,7 +207,7 @@ After test-writer finishes, invoke the **dispatcher** subagent:
 
 Invoke the **docs-writer** subagent:
 
-> Task: "Write the changelog and sync living documentation. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog to `{docs-dir}/changes`, dispatch researcher subagents to find affected living docs under `{living-docs-dir}`, grade each candidate and apply only the `sure` ones, then write `docs-updates.md` and your handoff log to the run directory."
+> Task: "Write the changelog, sync living documentation, and close out the source design doc. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Planner log: `{workflow-dir}/run-{ts}/planner.md`. Test-writer log: `{workflow-dir}/run-{ts}/test-writer.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog to `{docs-dir}/changes`, dispatch researcher subagents to find affected living docs under `{living-docs-dir}`, grade each candidate and apply only the `sure` ones, then take `source_doc` from the planner log and — if the run delivered every item it asked for — mark it `status: final` and archive it. Write `docs-updates.md` and your handoff log to the run directory."
 
 > **DISPATCHER REQUIRED** — this is your only permitted action after the agent returns.
 
@@ -217,12 +217,12 @@ After docs-writer finishes, invoke the **dispatcher** subagent:
 
 **Act on the dispatcher decision:**
 - `action: proceed, next: done` → go to Final Summary
-- `action: ask_user` → read the `## pending` section of `{workflow-dir}/run-{ts}/docs-updates.md` and present each pending document — path, line range, and the docs-writer's question — to the user via `AskUserQuestion` (or `ask_questions`):
-  - question: `"Living docs need a decision — {n} document(s) were not updated. How would you like to proceed?"`
+- `action: ask_user` → read the `## pending` and `## design doc` sections of `{workflow-dir}/run-{ts}/docs-updates.md` and present each pending item — path, line range, and the docs-writer's question — to the user via `AskUserQuestion` (or `ask_questions`):
+  - question: `"Living docs need a decision — {n} item(s) were not applied. How would you like to proceed?"`
   - header: `"Docs sync"`
   - options: `Apply` (answer the questions and let docs-writer apply the updates) · `Skip` (leave the documents untouched) · `Abort` (stop)
   - If the user selects **Apply**: invoke a second `AskUserQuestion` — question: `"How should each pending document be updated?"`, header: `"Docs answers"` — then re-invoke **docs-writer**:
-    > Task: "Apply the pending living-doc updates. Audit log: `{workflow-dir}/run-{ts}/docs-updates.md`. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. The user's answers: `{answers}`. Do not rewrite the changelog — it already exists. Apply only the pending entries the answers resolve, append the applied entries to `## modified` in `docs-updates.md`, and write an updated handoff log."
+    > Task: "Apply the pending living-doc updates. Audit log: `{workflow-dir}/run-{ts}/docs-updates.md`. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Planner log: `{workflow-dir}/run-{ts}/planner.md`. Run directory: `{workflow-dir}/run-{ts}/`. The user's answers: `{answers}`. Do not rewrite the changelog — it already exists. Apply only the pending entries the answers resolve, append the applied entries to `## modified` (or `## design doc`) in `docs-updates.md`, and write an updated handoff log."
     Then return to the dispatcher above.
   - If the user selects **Skip**: go to Final Summary. The pending entries stay recorded in `docs-updates.md`.
   - If the user selects **Abort**: stop. Output: `pipeline aborted at docs sync.`
@@ -249,6 +249,8 @@ changelog: {docs-dir}/changes/{date}-{feature}.md
 living docs:
 - updated: [list from docs-writer handoff log `docs_updated`]
 - pending: [list from docs-writer handoff log `docs_pending` — omit if empty]
+
+design doc: [`design_doc` → `design_doc_status`, plus `design_doc_archived` if set — omit the line when `design_doc` is null]
 
 logs:
 - {workflow-dir}/run-{ts}/planner.md

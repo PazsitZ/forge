@@ -86,7 +86,13 @@ status: design | needs-decision | accepted
 date: YYYY-MM-DD
 tags: [design, <area>]
 ---
+```
 
+Write one of the three statuses above. `final` is the fourth value in the enum, but it is not
+yours to set — the forge `docs-writer` sets it once a run has delivered every item the
+document asks for, and may then move the document to `{docs-dir}/archive`.
+
+```markdown
 # <Topic> — Design
 
 ## 1. Context

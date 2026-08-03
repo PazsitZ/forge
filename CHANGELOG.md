@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-03 — design-doc closure
+
+The `docs-writer` closes out the design doc a run was started from, so a delivered document
+stops advertising open work.
+
+**Added**
+- Part C — Design-doc closure in `agents/docs-writer.md`. Checks the document's decisions,
+  affected files, `[BLOCKING]`/`[VERIFY]` items and the test result against what the run
+  delivered. Fully delivered → frontmatter `status: final` plus a `completed:` date; partly
+  delivered → untouched, with the outstanding items listed; ambiguous → surfaced at the docs
+  gate. Only `status` and `completed` are ever written; the body is never rewritten.
+- Optional archive step: if `{docs-dir}/archive` exists, a `final` document moves there. The
+  directory is never created and an existing file is never overwritten.
+- `{docs-dir}/archive` row in the `bootstrap.md` document-directory table.
+- `source_doc` in the planner handoff payload — the doc-first input path, `null` in
+  idea-first mode. Survives resume mode, where the orchestrator no longer has the path.
+- `## design doc` section in `docs-updates.md` — source, fulfillment, grade, status
+  transition, archive destination, outstanding items.
+- `design_doc`, `design_doc_status`, `design_doc_archived` in the docs-writer handoff payload
+  and the Final Summary.
+
+**Changed**
+- `agents/docs-writer.md` gains `Bash`, granted for exactly one command shape — the C4
+  `mv` into `{docs-dir}/archive`. Discovery still goes through the researcher.
+- Old Part C (audit log) is now Part D.
+- `skills/design-doc/SKILL.md`: `final` documented as a fourth status the skill never writes
+  itself.
+- A cleanly unfulfilled design doc does not lower the docs-writer's `certainty` — it is a
+  recorded fact, not an open question.
+
 ## 2026-08-03
 
 Consolidated documentation-path placeholders. `{changelog-dir}` and the hardcoded

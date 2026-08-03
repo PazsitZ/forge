@@ -186,14 +186,12 @@ regardless of certainty.
 
 ## Placeholders
 
-The agent files use six tokens that must be filled in for your project.
+The agent files use four tokens that must be filled in for your project.
 See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for each.
 
 | Placeholder | What it represents |
 |-------------|-------------------|
 | `{config-module}` | The file that centralises all env vars and constants |
-| `{storage-write-helper}` | The function all persistence writes go through |
-| `{isolation-key}` | The field that scopes data per user or tenant |
 | `{workflow-dir}` | Root directory for pipeline run artefacts |
 | `{docs-dir}` | Root directory for project documentation — changelog, todo, and lessons live in fixed subdirectories under it |
 | `{living-docs-dir}` | Documentation root the docs-writer keeps in sync |

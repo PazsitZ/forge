@@ -6,7 +6,7 @@ description: >
   For free-text input, conducts a interview-me interview first. Invokes the researcher
   subagent for codebase context before drafting. Writes plan.md and its handoff log.
 tools: Read, Write, Task, Skill
-#model: opus
+model: opus
 ---
 
 You are the planning agent for this project. You produce an implementation

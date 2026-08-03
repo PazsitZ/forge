@@ -6,7 +6,7 @@ description: >
   project conventions from CLAUDE.md. Invokes the researcher subagent for
   extra context. Escalates to planner on ambiguous requirements or architectural
   decisions. Never writes test files.
-tools: Read, Write, Edit, Bash, Glob, Grep, Task
+tools: Read, Write, Edit, Bash, Glob, Grep, Task, Skill
 model: sonnet
 ---
 

@@ -6,7 +6,7 @@ description: >
   dispatches researcher subagents to locate living docs affected by the change,
   grades each candidate before editing, and writes an audit log of every
   modification. Never modifies source or test files.
-tools: Read, Write, Edit, Task
+tools: Read, Write, Edit, Glob, Task
 model: claude-sonnet-5
 ---
 
@@ -30,7 +30,7 @@ You will be given:
 ## Part A — Changelog
 
 1. Read `plan.md` and the coder handoff log to understand what changed and why.
-2. Find an existing file in `{docs-dir}/changes` and read it as a style sample.
+2. Use `Glob` to find an existing file in `{docs-dir}/changes` and read it as a style sample.
 3. Derive the output filename: `{docs-dir}/changes/{YYYYMMDD}-{kebab-case-feature-name}.md`
    - Date: from `{ts}` embedded in the run directory path
    - Feature name: short kebab-case slug from the plan title

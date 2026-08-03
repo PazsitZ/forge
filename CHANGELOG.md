@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-02
+
+The `docs-writer` agent now syncs living documentation, not just the changelog.
+
+**Added**
+- `{living-docs-dir}` placeholder — the documentation root the sync operates on. Documented in `bootstrap.md` with a "not applicable" removal path.
+- Living-doc discovery in `agents/docs-writer.md`: a keyword set derived from `plan.md` and the coder handoff log, then up to three **researcher** dispatches over `{living-docs-dir}`. The agent gains `Edit` and `Task`; it has no Grep or Bash, so all searching goes through the researcher.
+- Per-document grading before any edit — `sure` applies a surgical edit, `unsure` and `dont-know` are recorded as pending and surfaced to the user. Explicit exclusion list for append-only history: `{changelog-dir}`, `{workflow-dir}` run directories, dated archive files, `docs/lessons/`.
+- Audit log `{run_dir}/docs-updates.md` — written on every run, including no-op runs. Records the keyword set, the researcher dispatches, and each modification with its pre-edit line ranges, plus pending and skipped sections.
+- Post-docs-writer dispatcher and a docs-sync gate in `commands/forge.md` (`Apply` / `Skip` / `Abort`). Stage 5 was previously terminal and had no dispatcher.
+
+**Changed**
+- Resume mode scans for `docs-writer.md` and re-enters at the Stage 5 dispatcher.
+- Final Summary reports updated and pending living docs and lists `docs-updates.md`.
+- `agents/dispatcher.md` accepts `post-docs-writer` and `docs-writer` as a `next` value.
+
 ## 2026-08-01
 Added `design-doc` Skill. This produces a specific document, which can be inputted to the `forge` pipleine's planner.
 It creates a mid-high level design-doc. This produces a wider scopeddesign with additional components, discovering goals, options, risks and consequences.

@@ -41,6 +41,7 @@ User provides a run directory (e.g. `{workflow-dir}/run-20260516-125849`):
 1. Set `run_dir` = `$ARGUMENTS` (strip trailing `/` if present)
 2. Extract `{ts}` = substring after `run-` in the path
 3. Scan for log files, most-advanced first:
+   - `docs-writer.md` found → Stage 5 dispatcher
    - `test-writer.md` found → Stage 4 dispatcher
    - `qa-reviewer.md` found → Stage 3 dispatcher
    - `coder.md` found → Stage 2 dispatcher
@@ -206,9 +207,25 @@ After test-writer finishes, invoke the **dispatcher** subagent:
 
 Invoke the **docs-writer** subagent:
 
-> Task: "Write the changelog. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog and your handoff log to the run directory."
+> Task: "Write the changelog and sync living documentation. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog to `{changelog-dir}`, dispatch researcher subagents to find affected living docs under `{living-docs-dir}`, grade each candidate and apply only the `sure` ones, then write `docs-updates.md` and your handoff log to the run directory."
 
-When docs-writer completes, go to Final Summary.
+> **DISPATCHER REQUIRED** — this is your only permitted action after the agent returns.
+
+After docs-writer finishes, invoke the **dispatcher** subagent:
+
+> Task: "Read the docs-writer handoff log at `{workflow-dir}/run-{ts}/docs-writer.md`. Pipeline stage: post-docs-writer. Available next agents: done (if all docs resolved), docs-writer (if pending doc updates need a user decision). The log uses JSON front-matter — parse the JSON block at the top (before `---`). Return your dispatch-decision as a fenced JSON block."
+
+**Act on the dispatcher decision:**
+- `action: proceed, next: done` → go to Final Summary
+- `action: ask_user` → read the `## pending` section of `{workflow-dir}/run-{ts}/docs-updates.md` and present each pending document — path, line range, and the docs-writer's question — to the user via `AskUserQuestion` (or `ask_questions`):
+  - question: `"Living docs need a decision — {n} document(s) were not updated. How would you like to proceed?"`
+  - header: `"Docs sync"`
+  - options: `Apply` (answer the questions and let docs-writer apply the updates) · `Skip` (leave the documents untouched) · `Abort` (stop)
+  - If the user selects **Apply**: invoke a second `AskUserQuestion` — question: `"How should each pending document be updated?"`, header: `"Docs answers"` — then re-invoke **docs-writer**:
+    > Task: "Apply the pending living-doc updates. Audit log: `{workflow-dir}/run-{ts}/docs-updates.md`. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. The user's answers: `{answers}`. Do not rewrite the changelog — it already exists. Apply only the pending entries the answers resolve, append the applied entries to `## modified` in `docs-updates.md`, and write an updated handoff log."
+    Then return to the dispatcher above.
+  - If the user selects **Skip**: go to Final Summary. The pending entries stay recorded in `docs-updates.md`.
+  - If the user selects **Abort**: stop. Output: `pipeline aborted at docs sync.`
 
 ---
 
@@ -229,6 +246,10 @@ files written:
 test result: pass
 changelog: {changelog-dir}/{date}-{feature}.md
 
+living docs:
+- updated: [list from docs-writer handoff log `docs_updated`]
+- pending: [list from docs-writer handoff log `docs_pending` — omit if empty]
+
 logs:
 - {workflow-dir}/run-{ts}/planner.md
 - {workflow-dir}/run-{ts}/coder.md
@@ -236,6 +257,7 @@ logs:
 - {workflow-dir}/run-{ts}/review-findings.md
 - {workflow-dir}/run-{ts}/test-writer.md
 - {workflow-dir}/run-{ts}/docs-writer.md
+- {workflow-dir}/run-{ts}/docs-updates.md
 ```
 
 ---

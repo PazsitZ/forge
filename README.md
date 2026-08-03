@@ -33,7 +33,8 @@ idea or plan doc
 
 Escalation paths run in both directions — the coder can send ambiguous requirements back to
 the planner; the qa-reviewer can send bugs back to the coder; the test-writer can surface
-source bugs before they reach you.
+source bugs before they reach you; the docs-writer asks rather than guessing at a living
+document it is not sure about.
 
 ---
 
@@ -140,10 +141,31 @@ The third form resumes an aborted run — the pipeline re-enters at the most adv
 | ✋ | *approval gate* | You review findings before tests are written |
 | 4 | **test-writer** | Writes and runs tests; escalates source bugs to coder |
 | — | **dispatcher** | Confirms pass or routes back |
-| 5 | **docs-writer** | Writes a changelog entry in `{changelog-dir}` |
+| 5 | **docs-writer** | Writes a changelog entry in `{changelog-dir}`, then syncs living docs in `{living-docs-dir}` |
+| — | **dispatcher** | Confirms the docs sync, or surfaces documents it would not edit unasked |
 
-**Researcher** is a read-only sub-agent dispatched on demand by the planner and coder to
-answer specific codebase questions without polluting their context.
+**Researcher** is a read-only sub-agent dispatched on demand by the planner, coder, and
+docs-writer to answer specific codebase questions without polluting their context.
+
+### Living documentation sync
+
+The docs-writer does not stop at the changelog. It builds a keyword set from the plan and the
+coder's handoff log, dispatches researchers over `{living-docs-dir}` to find documents the
+change affects — `*-documentation*` files, `todo/` backlogs, architecture and usage guides —
+and grades each candidate before touching it:
+
+| Grade | Action |
+|-------|--------|
+| `sure` | Related and demonstrably stale — apply a surgical edit |
+| `unsure` | Related but the correct wording or scope is a judgment call — leave it, ask you |
+| `dont-know` | Cannot tell if it is related — leave it, ask you |
+
+Append-only history is never touched: `{changelog-dir}`, `{workflow-dir}` run directories,
+dated archive files, and `docs/lessons/`. Todo entries are marked done, never deleted.
+
+Every modification is recorded with file paths and pre-edit line ranges in
+`{workflow-dir}/run-{ts}/docs-updates.md` — written on every run, including runs that changed
+no documentation.
 
 ---
 
@@ -164,7 +186,7 @@ regardless of certainty.
 
 ## Placeholders
 
-The agent files use five tokens that must be filled in for your project.
+The agent files use six tokens that must be filled in for your project.
 See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for each.
 
 | Placeholder | What it represents |
@@ -174,6 +196,7 @@ See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for 
 | `{isolation-key}` | The field that scopes data per user or tenant |
 | `{workflow-dir}` | Root directory for pipeline run artefacts |
 | `{changelog-dir}` | Directory where changelog entries are written |
+| `{living-docs-dir}` | Documentation root the docs-writer keeps in sync |
 
 ---
 
@@ -183,7 +206,7 @@ See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for 
 agents/
   coder.md          writes code, never test files
   dispatcher.md     routing brain — read-only, no file writes
-  docs-writer.md    writes changelog entry, never modifies source files
+  docs-writer.md    writes changelog entry and syncs living docs, never modifies source files
   planner.md        produces plan.md from task or existing doc
   qa-reviewer.md    reviews code, writes review-findings.md
   researcher.md     read-only codebase explorer, discarded context

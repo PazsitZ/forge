@@ -8,7 +8,7 @@ then search-replace across all agent files.
 
 ## Project-level placeholders
 
-These four tokens appear in the agent files as `{name}`. They represent project-specific
+These tokens appear in the agent files as `{name}`. They represent project-specific
 concepts that must be resolved once at bootstrap time. For each one: decide the value,
 replace it in every agent file that references it, and document it in `CLAUDE.md`.
 
@@ -65,7 +65,7 @@ keeps pipeline artefacts co-located with the agent config. Using a project-level
 
 ### `{changelog-dir}`
 
-**Used in:** `commands/forge.md` (Stage 5 — Documentation)
+**Used in:** `commands/forge.md` (Stage 5 — Documentation), `agents/docs-writer.md`
 
 **What it represents:**
 The directory where the pipeline writes a changelog document after each completed feature.
@@ -82,9 +82,44 @@ least one sample document for the style reference to work.
 | `CHANGELOG/` |
 | `.changes/` |
 
-**If not applicable:** Your project doesn't maintain a changelog directory. Remove Stage 5
-(Documentation) from `commands/forge.md` and the `changelog:` line from
-the Final Summary block.
+**If not applicable:** Your project doesn't maintain a changelog directory. Remove Part A
+(Changelog) from `agents/docs-writer.md` and the `changelog:` line from the Final Summary
+block in `commands/forge.md`. Keep Stage 5 if you still want the living-doc sync.
+
+---
+
+### `{living-docs-dir}`
+
+**Used in:** `commands/forge.md` (Stage 5 — Documentation), `agents/docs-writer.md`
+
+**What it represents:**
+The root of the project's **living documentation** — documents that describe how the system
+currently works or what is currently planned, and therefore go stale when the code changes.
+After each run, the docs-writer dispatches researchers over this tree, grades every candidate
+document, and updates the ones that the change made false.
+
+This is the opposite of `{changelog-dir}`, which is an append-only history. The docs-writer
+never edits `{changelog-dir}`, `{workflow-dir}`, dated archive files, or `docs/lessons/` —
+correcting a historical record falsifies it.
+
+**Guidance:**
+Point this at the documentation root, not at an individual file. One directory only; if your
+docs are split across several roots, pick the common ancestor. Typical contents the sync
+targets: `*-documentation*` files and directories, `todo/`, `bugs/` backlogs, architecture and design
+notes, setup and usage guides.
+
+| Example | Effect |
+|---------|--------|
+| `docs` | Whole docs tree, minus the excluded subdirectories |
+| `docs/reference` | Narrow — only the reference set is kept in sync |
+| `.` | Whole repo; use only if documentation lives beside the code |
+
+**Note:** Do not include a trailing slash.
+
+**If not applicable:** Your project keeps no living documentation. Remove Part B (Living
+documentation sync) and Part C (Audit log) from `agents/docs-writer.md`, and in
+`commands/forge.md` drop the post-docs-writer dispatcher and the `living docs:` lines from
+the Final Summary.
 
 ---
 

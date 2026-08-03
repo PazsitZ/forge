@@ -14,7 +14,7 @@ You are the routing brain of the dev pipeline. You read a handoff log written by
 
 You will be given:
 - Path to a handoff log file
-- Current pipeline stage (e.g. `post-planner`, `post-coder`, `post-qa-reviewer`, `post-test-writer`)
+- Current pipeline stage (e.g. `post-planner`, `post-coder`, `post-qa-reviewer`, `post-test-writer`, `post-docs-writer`)
 - Optionally: context about what escalation paths are available
 
 ## Routing logic
@@ -39,7 +39,7 @@ Return ONLY this block — no prose before or after:
 ```json
 {
   "action": "proceed | ask_user",
-  "next": "planner | coder | qa-reviewer | test-writer | done",
+  "next": "planner | coder | qa-reviewer | test-writer | docs-writer | done",
   "certainty": "sure | unsure | dont-know",
   "escalate": false,
   "escalate_to": null,

@@ -207,7 +207,7 @@ After test-writer finishes, invoke the **dispatcher** subagent:
 
 Invoke the **docs-writer** subagent:
 
-> Task: "Write the changelog and sync living documentation. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog to `{changelog-dir}`, dispatch researcher subagents to find affected living docs under `{living-docs-dir}`, grade each candidate and apply only the `sure` ones, then write `docs-updates.md` and your handoff log to the run directory."
+> Task: "Write the changelog and sync living documentation. Plan: `{workflow-dir}/run-{ts}/plan.md`. Coder log: `{workflow-dir}/run-{ts}/coder.md`. Run directory: `{workflow-dir}/run-{ts}/`. Write the changelog to `{docs-dir}/changes`, dispatch researcher subagents to find affected living docs under `{living-docs-dir}`, grade each candidate and apply only the `sure` ones, then write `docs-updates.md` and your handoff log to the run directory."
 
 > **DISPATCHER REQUIRED** — this is your only permitted action after the agent returns.
 
@@ -244,7 +244,7 @@ files written:
 - [list from test-writer handoff log]
 
 test result: pass
-changelog: {changelog-dir}/{date}-{feature}.md
+changelog: {docs-dir}/changes/{date}-{feature}.md
 
 living docs:
 - updated: [list from docs-writer handoff log `docs_updated`]

@@ -110,7 +110,7 @@ document it is not sure about.
 
 ```
 /forge "add email notifications when a job finishes"
-/forge docs/plans/my-feature.md
+/forge {docs-dir}/todo/my-feature.md
 /forge {workflow-dir}/run-20260516-125849
 ```
 
@@ -141,7 +141,7 @@ The third form resumes an aborted run — the pipeline re-enters at the most adv
 | ✋ | *approval gate* | You review findings before tests are written |
 | 4 | **test-writer** | Writes and runs tests; escalates source bugs to coder |
 | — | **dispatcher** | Confirms pass or routes back |
-| 5 | **docs-writer** | Writes a changelog entry in `{changelog-dir}`, then syncs living docs in `{living-docs-dir}` |
+| 5 | **docs-writer** | Writes a changelog entry in `{docs-dir}/changes`, then syncs living docs in `{living-docs-dir}` |
 | — | **dispatcher** | Confirms the docs sync, or surfaces documents it would not edit unasked |
 
 **Researcher** is a read-only sub-agent dispatched on demand by the planner, coder, and
@@ -160,8 +160,8 @@ and grades each candidate before touching it:
 | `unsure` | Related but the correct wording or scope is a judgment call — leave it, ask you |
 | `dont-know` | Cannot tell if it is related — leave it, ask you |
 
-Append-only history is never touched: `{changelog-dir}`, `{workflow-dir}` run directories,
-dated archive files, and `docs/lessons/`. Todo entries are marked done, never deleted.
+Append-only history is never touched: `{docs-dir}/changes`, `{workflow-dir}` run directories,
+dated archive files, and `{docs-dir}/lessons/`. Todo entries are marked done, never deleted.
 
 Every modification is recorded with file paths and pre-edit line ranges in
 `{workflow-dir}/run-{ts}/docs-updates.md` — written on every run, including runs that changed
@@ -195,7 +195,7 @@ See [`bootstrap.md`](bootstrap.md) for descriptions, guidance, and examples for 
 | `{storage-write-helper}` | The function all persistence writes go through |
 | `{isolation-key}` | The field that scopes data per user or tenant |
 | `{workflow-dir}` | Root directory for pipeline run artefacts |
-| `{changelog-dir}` | Directory where changelog entries are written |
+| `{docs-dir}` | Root directory for project documentation — changelog, todo, and lessons live in fixed subdirectories under it |
 | `{living-docs-dir}` | Documentation root the docs-writer keeps in sync |
 
 ---

@@ -1,6 +1,6 @@
 # Agent Pipeline Bootstrap Guide
 
-Use this file when setting up the `docs/.claude/` agent pipeline for a new project.
+Use this file when setting up the `.claude/` agent pipeline for a new project.
 Hand it to an LLM along with your project's `CLAUDE.md` and ask it to fill in the placeholders,
 then search-replace across all agent files.
 
@@ -50,41 +50,50 @@ The root directory where the pipeline writes its per-run working directories
 
 **Guidance:**
 Choose a path that is either gitignored or deliberately tracked. Using a path inside `.claude/`
-keeps pipeline artefacts co-located with the agent config. Using a project-level path like
+keeps pipeline artifacts co-located with the agent config. Using a project-level path like
 `tmp/workflow/` or `.pipeline/` separates them from Claude config.
 
 | Example | Effect |
 |---------|--------|
-| `.claude/workflow` | Artefacts stay inside `.claude/` (original default) |
-| `tmp/workflow` | Artefacts land in a top-level temp dir |
+| `.claude/workflow` | Artifacts stay inside `.claude/` (original default) |
+| `tmp/workflow` | Artifacts land in a top-level temp dir |
 | `.pipeline` | Dedicated hidden dir at project root |
 
 **Note:** Do not include a trailing slash — the pipeline appends `/run-{ts}/` itself.
 
 ---
 
-### `{changelog-dir}`
+### `{docs-dir}`
 
-**Used in:** `commands/forge.md` (Stage 5 — Documentation), `agents/docs-writer.md`
+**Used in:** `commands/forge.md` (Stage 5 — Documentation), `agents/docs-writer.md`,
+`skills/design-doc/SKILL.md`
 
 **What it represents:**
-The directory where the pipeline writes a changelog document after each completed feature.
-The documentation stage reads an existing file from this directory as a style sample, then
-writes the new entry alongside it.
+The root directory for the project's own documentation — the single placeholder that
+replaces `docs/changes`, `docs/lessons`, `docs/todo` and similar hardcoded paths. Every
+pipeline artifact that isn't code lives in a **fixed subdirectory** under this root:
+`{docs-dir}/changes` (changelog), `{docs-dir}/todo` (design docs from the `design-doc`
+skill). See [Document directory layout](#document-directory-layout) below for the full list.
+
+Only the root is a placeholder. The subdirectory names themselves (`changes`, `todo`, …)
+are conventions baked into the agent and skill files — do not turn them into placeholders
+too. If a project needs a different subdirectory name, edit the reference directly in the
+file that uses it rather than adding another `{...}` token.
 
 **Guidance:**
-Use a path relative to the project root. The directory must already exist and contain at
-least one sample document for the style reference to work.
+Use a path relative to the project root. `{docs-dir}/changes` must already exist and
+contain at least one sample document for the changelog style reference to work.
 
 | Example |
 |---------|
-| `docs/changes/` |
-| `CHANGELOG/` |
-| `.changes/` |
+| `docs` |
+| `documentation` |
+| `.docs` |
 
-**If not applicable:** Your project doesn't maintain a changelog directory. Remove Part A
+**If not applicable:** Your project doesn't maintain a changelog. Remove Part A
 (Changelog) from `agents/docs-writer.md` and the `changelog:` line from the Final Summary
-block in `commands/forge.md`. Keep Stage 5 if you still want the living-doc sync.
+block in `commands/forge.md`. Keep Stage 5 if you still want the living-doc sync. If your
+project keeps no documentation at all, also remove the `design-doc` skill's write step.
 
 ---
 
@@ -98,8 +107,8 @@ currently works or what is currently planned, and therefore go stale when the co
 After each run, the docs-writer dispatches researchers over this tree, grades every candidate
 document, and updates the ones that the change made false.
 
-This is the opposite of `{changelog-dir}`, which is an append-only history. The docs-writer
-never edits `{changelog-dir}`, `{workflow-dir}`, dated archive files, or `docs/lessons/` —
+This is the opposite of `{docs-dir}/changes`, which is an append-only history. The docs-writer
+never edits `{docs-dir}/changes`, `{workflow-dir}`, dated archive files, or `{docs-dir}/lessons/` —
 correcting a historical record falsifies it.
 
 **Guidance:**
@@ -120,6 +129,25 @@ notes, setup and usage guides.
 documentation sync) and Part C (Audit log) from `agents/docs-writer.md`, and in
 `commands/forge.md` drop the post-docs-writer dispatcher and the `living docs:` lines from
 the Final Summary.
+
+---
+
+## Document directory layout
+
+Reference only — none of the entries below are placeholders. Each is a fixed subdirectory
+name baked into the agent/skill files that reference it, always relative to `{docs-dir}`.
+If a project wants a different name for one of these, edit the reference directly in the
+listed file(s) rather than introducing a new `{...}` token.
+
+| Directory | Written by | Read by | Purpose |
+|---|---|---|---|
+| `{docs-dir}/changes` | `agents/docs-writer.md` | style-sample step in `agents/docs-writer.md` | Append-only changelog, one file per completed run. Never edited after the fact. |
+| `{docs-dir}/todo` | `skills/design-doc/SKILL.md` | `commands/forge.md` (doc-first mode input), `agents/docs-writer.md` (marks resolved entries done, never deletes) | Design/analysis documents awaiting a `/forge` run, and the open backlog. |
+| `{docs-dir}/lessons` | project-specific (not written by this pipeline) | — | The user's own record of what happened. Explicitly excluded from the docs-writer's living-doc sync — never edited or corrected retroactively. |
+
+`{living-docs-dir}` (see above) typically points at `{docs-dir}` itself, so the sync
+naturally treats `{docs-dir}/changes`, `{docs-dir}/lessons`, and `{workflow-dir}` as
+excluded subtrees rather than in-scope documentation.
 
 ---
 
@@ -155,7 +183,7 @@ Typical session with an LLM:
    - `n/a` — if the concept doesn't apply to your project
 
 3. **Have the LLM apply the values:**
-   Ask: *"Now search-replace every `{placeholder}` across all files under `docs/.claude/`
+   Ask: *"Now search-replace every `{placeholder}` across all files under `.claude/`
    with the value I gave you. For any `n/a`, remove the corresponding bullet or section
    from the relevant agent files."*
 

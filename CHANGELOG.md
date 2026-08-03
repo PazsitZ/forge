@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-08-03
+
+Consolidated documentation-path placeholders. `{changelog-dir}` and the hardcoded
+`docs/lessons/`, `docs/todo/` paths scattered across the agent/skill files were three
+separate things a bootstrapping project had to get right; now there is one.
+
+**Added**
+- `{docs-dir}` placeholder — root directory for project documentation. Replaces
+  `{changelog-dir}` in `bootstrap.md`, `agents/docs-writer.md`, and `commands/forge.md`.
+- "Document directory layout" reference table in `bootstrap.md` — documents the fixed
+  subdirectory conventions (`{docs-dir}/changes`, `{docs-dir}/todo`, `{docs-dir}/lessons`)
+  now that they are no longer individually configurable.
+
+**Changed**
+- `agents/docs-writer.md`, `commands/forge.md`, `README.md`: `{changelog-dir}` → `{docs-dir}/changes`.
+- `skills/design-doc/SKILL.md`: hardcoded `docs/todo/` → `{docs-dir}/todo/`.
+- `README.md`, `agents/docs-writer.md`: hardcoded `docs/lessons/` → `{docs-dir}/lessons/`.
+- `bootstrap.md`: fixed a stray `docs/.claude/` → `.claude/` in the intro and the
+  bootstrap-workflow instructions.
+
+**Not changed**
+- `{workflow-dir}` and `{living-docs-dir}` stay independent placeholders — pipeline run
+  artefacts and the living-docs sync scope can each have different needs than the
+  changelog/todo/lessons docs root (e.g. living outside `{docs-dir}` entirely, or gitignored).
+
 ## 2026-08-02
 
 The `docs-writer` agent now syncs living documentation, not just the changelog.

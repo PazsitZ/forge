@@ -1,6 +1,6 @@
 ---
 name: design-doc
-description: Produce a design, planning, analysis, or architecture-decision document through a structured interview. Dispatches researcher subagents for codebase facts first, then interviews the user on every open fork with pros/cons and a recommendation, then writes a decision document to docs/todo/ and stops. Use for "design doc", "planning doc", "analysis doc", "design proposal", "architecture decision", or when asked to think a change through before building it.
+description: Produce a design, planning, analysis, or architecture-decision document through a structured interview. Dispatches researcher subagents for codebase facts first, then interviews the user on every open fork with pros/cons and a recommendation, then writes a decision document to {docs-dir}/todo/ and stops. Use for "design doc", "planning doc", "analysis doc", "design proposal", "architecture decision", or when asked to think a change through before building it.
 ---
 
 # Design Doc
@@ -74,7 +74,7 @@ broad one may take several batches. Depth is set by ambiguity, not by a quota.
 
 ## Step 3 — Write the document
 
-Write to `docs/todo/{slug}-design.md`. Date goes in the frontmatter, not the
+Write to `{docs-dir}/todo/{slug}-design.md`. Date goes in the frontmatter, not the
 filename. (Use `{slug}-analysis.md` when the document diagnoses an existing
 system rather than proposing a change.)
 
@@ -123,7 +123,7 @@ filler and makes the document less likely to be read.
 | `## Risks` | doing this could cause a *new* problem while solving the old one |
 | `## Consequences` | this reaches into work outside its own scope, for better or worse |
 | `## Evaluation plan` | a metric, benchmark, or eval decides whether this worked |
-| `## Related docs` | cross-references exist — link them as `docs/...` paths |
+| `## Related docs` | cross-references exist — link them as `{docs-dir}/...` paths |
 
 Order them as listed above when several apply.
 
@@ -190,6 +190,6 @@ Print the document path and the chaining command, as a suggestion only — do no
 run it:
 
 ```
-Written: docs/todo/<slug>-design.md
-Next (when ready): /forge docs/todo/<slug>-design.md
+Written: {docs-dir}/todo/<slug>-design.md
+Next (when ready): /forge {docs-dir}/todo/<slug>-design.md
 ```

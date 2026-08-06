@@ -22,6 +22,8 @@ READ_TOOLS = {"Read", "NotebookRead"}
 WRITE_TOOLS = {"Write"}
 EDIT_TOOLS = {"Edit", "MultiEdit", "NotebookEdit"}
 INDEX_NAMES = {"lessons.md", "MEMORY.md"}
+ARCHIVE_DIR = "archive"
+REPORT_DIR = "curate-notes"
 
 
 def parse_ts(value: str | None) -> datetime | None:
@@ -39,17 +41,41 @@ def transcript_dir(project_dir: Path) -> Path:
     return Path.home() / ".claude" / "projects" / slug
 
 
+def strip_frontmatter(raw: bytes) -> bytes:
+    """Drop a leading YAML frontmatter block, if any."""
+    lines = raw.splitlines(keepends=True)
+    if not lines or lines[0].strip() != b"---":
+        return raw
+    for i in range(1, len(lines)):
+        if lines[i].strip() == b"---":
+            return b"".join(lines[i + 1:])
+    return raw
+
+
 def body_sha(path: Path) -> str:
+    """sha256 prefix of the file body, frontmatter excluded.
+
+    Frontmatter carries the name/title a rename rewrites, so hashing it would
+    defeat the one match this key exists to make.
+    """
     try:
-        return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+        return hashlib.sha256(strip_frontmatter(path.read_bytes())).hexdigest()[:16]
     except OSError:
         return ""
 
 
-def classify(path: Path, roots: dict[str, Path]) -> tuple[str, str] | None:
-    """Map an absolute path to (kind, slug); None if outside the corpus.
+def item_key(kind: str, path: Path) -> str:
+    """Ledger key: namespaced by store, so a lesson and a memory that happen to
+    share a filename stay distinct entries. Index files keep their extension.
+    """
+    return f"{kind}:{path.name if kind == 'index' else path.stem}"
 
-    kind is one of: lesson, memory, index, archived.
+
+def classify(path: Path, roots: dict[str, Path]) -> tuple[str, str, bool] | None:
+    """Map an absolute path to (kind, key, archived); None if outside the corpus.
+
+    kind is the *store* - lesson, memory or index - and does not change when a
+    file is archived, so an item's counts survive the move into archive/.
     """
     try:
         resolved = path.resolve()
@@ -64,11 +90,12 @@ def classify(path: Path, roots: dict[str, Path]) -> tuple[str, str] | None:
             continue
         if resolved.suffix != ".md":
             return None
+        parents = rel.parts[:-1]
+        if REPORT_DIR in parents:
+            return None  # this skill's own reports: no rule, no index line
         if resolved.name in INDEX_NAMES:
-            return ("index", resolved.name)
-        if "archive" in rel.parts[:-1]:
-            return ("archived", resolved.stem)
-        return (kind, resolved.stem)
+            return ("index", item_key("index", resolved), False)
+        return (kind, item_key(kind, resolved), ARCHIVE_DIR in parents)
     return None
 
 
@@ -77,7 +104,7 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
     tdir = transcript_dir(project_dir)
     files = sorted(tdir.glob("*.jsonl")) if tdir.is_dir() else []
 
-    # slug -> list of (ts, session_id, action)
+    # key -> list of (ts, session_id, action)
     events: dict[str, list[tuple[datetime, str, str]]] = {}
     kinds: dict[str, str] = {}
     oldest: datetime | None = None
@@ -126,9 +153,9 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
                     hit = classify(Path(raw), roots)
                     if hit is None:
                         continue
-                    kind, slug = hit
-                    kinds.setdefault(slug, kind)
-                    events.setdefault(slug, []).append((ts, session, action))
+                    kind, key, _archived = hit
+                    kinds.setdefault(key, kind)
+                    events.setdefault(key, []).append((ts, session, action))
 
     # A session that writes or edits a file gets no read credit for it. Two
     # false positives collapse into this one rule: the authoring session
@@ -138,18 +165,18 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
     # the credit, so counts under-report rather than inflate.
     authoring: dict[str, str] = {}
     modifiers: dict[str, set[str]] = {}
-    for slug, evs in events.items():
+    for key, evs in events.items():
         writers = [e for e in evs if e[2] in ("write", "edit")]
-        modifiers[slug] = {e[1] for e in writers}
+        modifiers[key] = {e[1] for e in writers}
         creators = [e for e in evs if e[2] == "write"] or writers
         if creators:
-            authoring[slug] = min(creators, key=lambda e: e[0])[1]
+            authoring[key] = min(creators, key=lambda e: e[0])[1]
 
     counted: dict[str, dict] = {}
     skipped = {"modifying_session": 0, "curate_session": 0, "before_since": 0}
 
-    for slug, evs in events.items():
-        kind = kinds[slug]
+    for key, evs in events.items():
+        kind = kinds[key]
         reads = 0
         last: datetime | None = None
         for ts, session, action in evs:
@@ -158,7 +185,7 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
             if session in skip_sessions:
                 skipped["curate_session"] += 1
                 continue
-            if session in modifiers.get(slug, ()):
+            if session in modifiers.get(key, ()):
                 skipped["modifying_session"] += 1
                 continue
             if since is not None and ts <= since:
@@ -166,18 +193,41 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
                 continue
             reads += 1
             last = ts if last is None or ts > last else last
-        counted[slug] = {
+        counted[key] = {
             "kind": kind,
             "reads": reads,
             "last_read": last.isoformat() if last else None,
-            "authoring_session": authoring.get(slug),
+            "authoring_session": authoring.get(key),
         }
 
+    scanned_at = datetime.now(timezone.utc)
+
+    # The window this run actually observed, already clipped to `since`. The
+    # caller appends it to the ledger's scans[]; coverage sums those windows, so
+    # handing back the raw transcript span - which always reaches ~30 days back,
+    # `since` or not - would let every run re-credit time an earlier run already
+    # counted, and items would clear the eviction floors in a fraction of the
+    # real elapsed time.
+    window = None
+    gap = None
+    if oldest is not None:
+        start = oldest
+        if since is not None:
+            if since < oldest:
+                # Transcripts pruned between the runs: nobody was watching in
+                # between, and coverage must not claim otherwise.
+                gap = {"from": since.isoformat(), "to": oldest.isoformat()}
+            else:
+                start = since
+        window = {"start": start.isoformat(), "end": scanned_at.isoformat()}
+
     return {
-        "scanned_at": datetime.now(timezone.utc).isoformat(),
+        "scanned_at": scanned_at.isoformat(),
         "project_dir": str(project_dir),
         "transcript_dir": str(tdir),
         "transcripts": len(files),
+        "window": window,
+        "unobserved_gap": gap,
         "window_oldest": oldest.isoformat() if oldest else None,
         "window_newest": newest.isoformat() if newest else None,
         "since": since.isoformat() if since else None,
@@ -187,18 +237,24 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
 
 
 def on_disk(roots: dict[str, Path]) -> dict[str, dict]:
-    """Live corpus files, so the caller can spot ledger entries with no file."""
+    """Live *and* archived corpus files, so the caller can tell an entry that
+    was archived apart from one that vanished, and can match a rename by sha.
+    """
     out: dict[str, dict] = {}
-    for kind, root in roots.items():
+    for _kind, root in roots.items():
         if root is None or not root.is_dir():
             continue
-        for path in sorted(root.glob("*.md")):
-            if path.name in INDEX_NAMES:
+        paths = sorted(root.glob("*.md")) + sorted((root / ARCHIVE_DIR).rglob("*.md"))
+        for path in paths:
+            hit = classify(path, roots)
+            if hit is None:
                 continue
+            kind, key, archived = hit
             st = path.stat()
-            out[path.stem] = {
+            out[key] = {
                 "kind": kind,
                 "path": str(path),
+                "archived": archived,
                 "body_sha": body_sha(path),
                 "mtime": datetime.fromtimestamp(st.st_mtime, timezone.utc).date().isoformat(),
             }
@@ -220,14 +276,28 @@ def main() -> int:
 
     project = Path(args.project_dir).resolve()
     lessons = Path(args.lessons_dir).resolve() if args.lessons_dir else project / "docs" / "lessons"
-    memories = Path(args.memories_dir).resolve() if args.memories_dir else project / "docs" / "memories"
 
     if not lessons.is_dir():
         print(f"no lessons directory at {lessons}", file=sys.stderr)
         return 2
 
-    roots = {"lesson": lessons, "memory": memories if memories.is_dir() else None}
+    # An explicitly named memory store that does not exist is an error, not an
+    # empty one: reporting "0 memories" for a mistyped path reads as a curated
+    # store rather than a missing one.
+    if args.memories_dir:
+        memories = Path(args.memories_dir).resolve()
+        if not memories.is_dir():
+            print(f"no memories directory at {memories}", file=sys.stderr)
+            return 2
+    else:
+        memories = project / "docs" / "memories"
+        if not memories.is_dir():
+            memories = None
+
+    roots = {"lesson": lessons, "memory": memories}
     result = scan(project, roots, parse_ts(args.since), set(args.exclude_session))
+    result["roots"] = {k: (str(v) if v else None) for k, v in roots.items()}
+    result["memories_scanned"] = memories is not None
     result["on_disk"] = on_disk(roots)
     json.dump(result, sys.stdout, indent=2)
     sys.stdout.write("\n")

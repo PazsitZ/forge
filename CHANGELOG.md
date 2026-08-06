@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-08-06 — curate-learnings: episode-based promotion behind a manual gate
+
+Promotion is the skill's only irreversible-in-effect action — it writes into `AGENTS.md` or the
+global instructions file, which then load on every request and are never revisited by a later run.
+It is now a nomination the user confirms item by item, and the read count that ranks those
+nominations measures episodes rather than raw opens.
+
+**Added**
+- `read_sessions` and `read_days` per ledger item — distinct sessions and distinct UTC dates
+  behind the reads, **unioned across runs, never summed**. Two reads in one sitting are one
+  episode; only a span between them is recurrence.
+- Manual promotion gate. `promote?` produces nominations, ranked by the thresholds but decided by
+  nobody: each is routed, written out as the exact line and target file, and confirmed separately.
+  The user may also nominate any live item regardless of the counts.
+- Lesson file shape documented in `CLAUDE.learnings.md`, next to the index line format it already
+  defined. The skill creates its own `archive/` and `curate-notes/` when missing, and asks before
+  rebuilding a missing `lessons.md`.
+
+**Changed**
+- Promote condition is now `reads ≥ 2, from ≥2 sessions, read_days spanning ≥ 7d`, with the
+  30-day requirement clarified as a property of the ledger's observation, not of the item.
+- Report tables carry `sessions` and `span` columns on promote rows, and invite user nominations.
+- `scan_usage.py` — ledger keys namespaced `<kind>:<slug>`; archived files enumerated; index files
+  reconciled instead of marked gone; `body_sha` excludes frontmatter; `curate-notes/` reports
+  dropped from the corpus; observed `window` clipped to `--since` so coverage cannot double-count;
+  a named-but-missing `--memories-dir` now fails instead of reporting an empty store.
+
+**Known limit**
+- Reads are visible only where Claude Code writes transcripts. Under CoPilot or an editor the
+  counts stay at 0, which under-promotes (tolerable) and over-proposes archival (the reason
+  `archive` keeps its 60-day floor, 5-row cap, and read-before-proposing rule).
+
 ## 2026-08-03 — harness self-improvement with lessons and memories
 
 Integrated learning system for Claude Code. Records lessons learned during development
@@ -16,8 +48,9 @@ agent or user instructions.
   - Scan usage (read counts, last access) via `scan_usage.py` against a 30-day transcript window.
   - Merge scan results into a durable ledger, tracking renames and deletions.
   - Classify each item per `references/POLICY.md` thresholds and routing rules.
-  - Report candidate archives, merges, and promotions; ask for user approval per verdict group.
-  - Apply approved actions: move files to `archive/`, consolidate duplicates, promote proven
+  - Report candidate archives, merges, and promotions; ask for user approval per verdict group,
+    and per item for promotions.
+  - Apply approved actions: move files to `archive/`, consolidate duplicates, promote confirmed
     rules into `AGENTS.md` or global `CLAUDE.md`.
 - `references/LEDGER-FORMAT.md` — documents ledger schema, read counts, and deliberately
   under-counted statistics.
@@ -25,7 +58,7 @@ agent or user instructions.
   and routing rules (archive/compact/promote/merge).
 - `scripts/scan_usage.py` — reads recent transcript snapshots and ledger, measures usage
   and last-read timestamp per lesson/memory file, emits under-counted read stats.
-- Detailed walkthrough article: `../Raz-pAI/docs/articles/20260725-make-your-harness-learn-from-its-mistakes.md`
+- Rationale for the design is written up in the skill's own `references/` docs.
 
 **Changed**
 - `CLAUDE.learnings.md` (this file) now also documents the feedback/project/reference memory

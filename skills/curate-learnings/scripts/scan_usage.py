@@ -179,6 +179,13 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
         kind = kinds[key]
         reads = 0
         last: datetime | None = None
+        # Distinct sessions and distinct UTC days behind those reads. Two reads
+        # in one sitting are one episode of use; two reads a week apart are
+        # recurrence, and only recurrence supports promoting a rule into a file
+        # that then loads on every request. The raw count cannot tell them
+        # apart, so the promote gate needs these alongside it.
+        read_sessions: set[str] = set()
+        read_days: set[str] = set()
         for ts, session, action in evs:
             if action != "read":
                 continue
@@ -192,11 +199,18 @@ def scan(project_dir: Path, roots: dict[str, Path], since: datetime | None,
                 skipped["before_since"] += 1
                 continue
             reads += 1
+            read_sessions.add(session)
+            read_days.add(ts.astimezone(timezone.utc).date().isoformat())
             last = ts if last is None or ts > last else last
         counted[key] = {
             "kind": kind,
             "reads": reads,
             "last_read": last.isoformat() if last else None,
+            # Emitted as sorted lists, not counts: a session straddling a window
+            # boundary appears in two runs, so the ledger has to union these
+            # across runs rather than add them up.
+            "read_sessions": sorted(read_sessions),
+            "read_days": sorted(read_days),
             "authoring_session": authoring.get(key),
         }
 

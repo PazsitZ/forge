@@ -23,6 +23,8 @@ It is written in the repo so it travels with the corpus it describes and shows u
       "aliases": [],
       "reads": 1,
       "last_read": "2026-07-29T10:37:23.000Z",
+      "read_sessions": ["9f1c…"],
+      "read_days": ["2026-07-29"],
       "status": "live"
     }
   }
@@ -40,6 +42,7 @@ It is written in the repo so it travels with the corpus it describes and shows u
 | `body_sha` | sha256 prefix of the file body, **frontmatter excluded**. The rename key — see below. |
 | `aliases` | Previous keys whose counts were carried forward. |
 | `reads`, `last_read` | Cumulative across all runs, not just the current window. Archived items keep accruing them. |
+| `read_sessions`, `read_days` | Distinct session ids, and distinct UTC dates, behind those reads. **Unioned across runs, never summed** — a session straddling a window boundary is seen twice, and adding counts would turn one sitting into fake recurrence. The `promote` gate reads these, not `reads` alone. |
 | `status` | `live`, `archived` (found under `archive/`), or `gone` (vanished from the tree with no content match). |
 
 ## Identity survives renames
@@ -61,6 +64,8 @@ Renaming *and* editing a file in the same step defeats the match. Accepted: the 
 3. **Events at or before `scanned_through`**, so a re-run adds nothing.
 
 The consequence is directional and must be stated in every report: **counts under-report use.** `reads: 0` means "no evidence of use in the ledger's span", never "proven useless". A verdict of `archive` rests on that absence plus the age floor, which is why archiving is reversible and deletion is not offered.
+
+A fourth exclusion has no entry in the ledger at all, because it leaves no trace to record: **reads from any other tool.** Transcripts are Claude Code's. A file opened by Copilot, another agent, or the user's editor is read without the scanner ever learning it happened. `reads` is a Claude-Code-share metric, not a use metric — which is tolerable for `promote` (it under-promotes) and is the standing hazard for `archive`.
 
 ## Coverage is what the floors measure
 

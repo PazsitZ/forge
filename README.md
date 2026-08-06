@@ -67,6 +67,10 @@ document it is not sure about.
        SKILL.md
       design-doc/
        SKILL.md
+      curate-learnings/
+       SKILL.md
+       references/
+       scripts/
      bootstrap.md          ← fill this in first
    ```
 
@@ -93,6 +97,10 @@ document it is not sure about.
        SKILL.md
      bootstrap.md          ← fill this in first
    ```
+
+   `skills/curate-learnings` is Claude-only: it measures usage from Claude Code session
+   transcripts (`~/.claude/projects/<slug>/*.jsonl`). Under CoPilot it finds no transcripts,
+   reports "no evidence available", and proposes no evictions.
 
 2. Open `bootstrap.md` with your LLM and fill in the five project-level placeholders.
    The guide walks through each one and tells you what to remove if a concept doesn't apply.
@@ -233,6 +241,10 @@ skills/
     SKILL.md        Skill used for interviewing
   design-doc/
     SKILL.md
+  curate-learnings/
+    SKILL.md        prunes, merges and promotes lessons/memories from measured usage
+    references/     verdict policy and usage-ledger format
+    scripts/        transcript scanner (read-only, stdlib only)
   
 bootstrap.md        placeholder guide for setting up a new project
 ```

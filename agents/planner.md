@@ -49,10 +49,46 @@ Dispatch with Task → `researcher`. One specific, answerable question plus file
 3. Draft the plan.
 
 **Mode B — existing plan document (path given):**
-1. Read it.
-2. Dispatch a researcher to verify every file path and symbol it references is still accurate.
-3. Restructure into the format below.
-4. Record its path as `source_doc` in your handoff payload. Leave the document itself untouched.
+1. Read it, frontmatter included if it has any.
+2. **Intake check** — if the document is marked `status: needs-decision`, or holds any
+   `[BLOCKING]` item, or presents a fork it left open, settle those with `skill: interview-me`
+   *before* dispatching any researcher. A document with none of these signals skips this step.
+3. Dispatch a researcher to verify every file path and symbol it references is still accurate.
+4. Restructure into the format below, applying `## Design-doc intake` to whichever sections the
+   document actually has.
+5. Record its path as `source_doc` in your handoff payload. Leave the document itself untouched.
+
+## Design-doc intake
+
+Mode B accepts anything: a document written by the `design-doc` skill, or a hand-written plan
+with no frontmatter and no section structure at all. Every rule here is keyed to a *signal in
+the document*, not to the mode. A signal that is absent fires nothing — an unstructured plan is
+read on its merits and planned exactly as it is today.
+
+**Decisions already recorded are binding.** A fork the document settled — an explicit approach
+with a rejected alternative — is not yours to re-open. Do not run the `## options` block on it.
+If research shows the decision cannot be implemented as written, escalate with the conflict;
+never silently implement the alternative it rejected. A document that records no such decision
+binds nothing, and the `## Multiple solutions` rules apply unchanged.
+
+Map the sections it does have:
+
+| Document section | plan.md destination | Note |
+|---|---|---|
+| Context | `## Context` | Restate; do not re-derive the problem |
+| Decisions | `## Requirements`, `## Implementation steps` | Binding; the rationale may inform `## Context` |
+| Goals | `## Requirements` | Restate as numbered and testable |
+| Affected files | `## Scope` | A seed only — every path re-verified by a researcher |
+| Open questions `[VERIFY]` | `## Open questions` | Carried through verbatim |
+| Open questions `[BLOCKING]` | — | Settled at intake, or escalated |
+| Non-goals | `## Out of scope` | Direct source when present; otherwise derive as usual |
+| Options (fork left open) | — | An unmade decision: treat as `[BLOCKING]` at intake |
+| Risks, Failure modes | `## Hazards` candidates | A row only once a researcher supplies the `file:line`; otherwise `[VERIFY]` |
+| Consequences, Evaluation plan, Related docs | — | Not consumed |
+
+**Path drift.** A path the document names that no researcher can confirm is dropped from
+`## Scope` and recorded in your handoff log `## did`. If the intent behind it still stands,
+add a `[VERIFY]` item saying so.
 
 ## Researcher dispatch
 
@@ -202,6 +238,8 @@ Escalate when:
 - `Open questions` holds any `[BLOCKING]` item — never `certainty: sure` alongside one
 - a `Reachability` row is NO and you can neither scope that file in nor justify leaving it out
 - a `## Hazards` row has no resolution you can price
+- a decision recorded in the input document is contradicted by researcher findings — surface the
+  conflict; never substitute the alternative that document rejected
 
 `[VERIFY]` items are normal and do not lower certainty; disclosing them beats hiding them.
 

@@ -62,7 +62,10 @@ Invoke the **planner** subagent:
 ### Doc-first mode
 Invoke the **planner** subagent:
 
-> Task: "Run in doc-first mode. The existing plan document is at: `$ARGUMENTS`. Run directory: `{workflow-dir}/run-{ts}/`. Read the plan, invoke the researcher subagent to verify file paths and symbols, then write plan.md (structured version) and your handoff log to the run directory."
+> Task: "Run in doc-first mode. The existing plan document is at: `$ARGUMENTS`. Run directory: `{workflow-dir}/run-{ts}/`. Read the plan. If it is marked `status: needs-decision` or holds any `[BLOCKING]` item, use the Skill tool (skill: interview-me) to settle those first; any decision the document already records with a rejected alternative is binding — do not re-open it. Then invoke the researcher subagent to verify file paths and symbols, then write plan.md (structured version) and your handoff log to the run directory."
+
+Both clauses are conditional: a hand-written plan with no frontmatter and no `[BLOCKING]` items
+hits neither, and the stage runs exactly as it did before.
 
 After the planner finishes, validate the plan artifact:
 

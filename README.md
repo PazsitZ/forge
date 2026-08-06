@@ -1,6 +1,6 @@
 # Forge 
 
-**Structured, multi-agent development pipeline
+**Structured, multi-agent development pipeline**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -8,11 +8,14 @@
 
 A drop-in set of Claude Code / CoPilot agent definitions and a slash command that turn a task description
 into reviewed, tested code — with human approval gates at each major stage.
-Language and framework agnostic. Configurable for any project via five placeholders.
+Language and framework agnostic. Configurable for any project via four placeholders.
 (Applicable for any other agentic tool with the correct placing of agents skill and command.)
 
 ```
-idea or plan doc
+  [design-doc]  ←── optional, interview-driven
+       │
+       ▼
+idea, or design/plan doc in {docs-dir}/todo/
        │
    [planner]  ←── interview-me Skill
        │
@@ -102,7 +105,7 @@ document it is not sure about.
    transcripts (`~/.claude/projects/<slug>/*.jsonl`). Under CoPilot it finds no transcripts,
    reports "no evidence available", and proposes no evictions.
 
-2. Open `bootstrap.md` with your LLM and fill in the five project-level placeholders.
+2. Open `bootstrap.md` with your LLM and fill in the four project-level placeholders.
    The guide walks through each one and tells you what to remove if a concept doesn't apply.
    
 + align models to use in agents frontmatter to fit your provider options. Follow the grades of models:
@@ -117,12 +120,15 @@ document it is not sure about.
 ## Usage
 
 ```
+/design-doc "rework how jobs report progress"      ← optional, writes a design doc
 /forge "add email notifications when a job finishes"
 /forge {docs-dir}/todo/my-feature.md
 /forge {workflow-dir}/run-20260516-125849
 ```
 
-The first form interviews you to clarify scope, then plans and builds.
+`/design-doc` is the optional pre-design step described below — it settles the design and stops.
+
+The first `/forge` form interviews you to clarify scope, then plans and builds.
 The second form reads an existing plan document and picks up from there.
 The third form resumes an aborted run — the pipeline re-enters at the most advanced completed stage.
 
@@ -130,10 +136,41 @@ The third form resumes an aborted run — the pipeline re-enters at the most adv
 
 ## Pre-design Phase
 
-| Stage | Skill | What it does |
-|-------|-------|-------------|
-| 0 | **design-doc** |  Creates a higher lev(el design document to be inputted into `forge` (and it's `planner` agent) |
+`design-doc` is an optional Stage 0. Invoke it as `/design-doc "…"`, or by asking for a design,
+planning, analysis, or architecture-decision document. It interviews you the same way the
+planner does, then writes the document and stops — it never implements.
 
+**What it produces.** A decision document at `{docs-dir}/todo/{slug}-design.md` (or
+`{slug}-analysis.md` when it diagnoses an existing system rather than proposing a change), with
+four sections that are always present — Context, Decisions, Affected files, Open questions —
+plus optional sections such as Risks, Failure modes, or an Evaluation plan, added only when the
+topic warrants them. Frontmatter carries `status: design | needs-decision | accepted`. See
+[`skills/design-doc/SKILL.md`](skills/design-doc/SKILL.md) for the full contract.
+
+**What it deliberately does not produce.** No Reachability table, no ordered implementation
+steps, no line-level scope. The design doc owns *what and why*; the planner owns *where and
+how*. That split is the point of the two-step flow — you settle the design at a high level
+first, and the planner's job narrows to breaking those decisions down into a spec the coder can
+execute without re-deciding anything.
+
+**Chaining.** The document is directly ingestible by forge's doc-first mode:
+
+```
+/design-doc "rework how jobs report progress"
+/forge {docs-dir}/todo/job-progress-design.md
+```
+
+The planner reads the document, settles any `[BLOCKING]` item with you before researching,
+re-verifies every path it names, and treats decisions already recorded there as binding. It
+records the path as `source_doc`, and the docs-writer closes the document out at the end of the
+run — see [Design-doc closure](#design-doc-closure).
+
+**When it is worth it.** Reach for the two-step flow when the scope is broad or contested, when
+several approaches have real trade-offs, or when the decision should outlive the run that
+implements it. For a well-understood change, `/forge "…"` interviews you directly and skips
+the extra artifact.
+
+---
 
 ## Pipeline stages
 
@@ -240,7 +277,7 @@ skills/
   interview-me/
     SKILL.md        Skill used for interviewing
   design-doc/
-    SKILL.md
+    SKILL.md        optional Stage 0 — interviews, writes a decision document, stops
   curate-learnings/
     SKILL.md        prunes, merges and promotes lessons/memories from measured usage
     references/     verdict policy and usage-ledger format

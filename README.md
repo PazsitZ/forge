@@ -11,6 +11,17 @@ into reviewed, tested code — with human approval gates at each major stage.
 Language and framework agnostic. Configurable for any project via four placeholders.
 (Applicable for any other agentic tool with the correct placing of agents skill and command.)
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/pipeline-dark.svg">
+    <img src="assets/pipeline-light.svg" width="100%"
+         alt="Forge pipeline: an optional design-doc feeds /forge, then planner, an approval gate, coder, qa-reviewer, a second approval gate, test-writer and docs-writer, ending at done. Each stage lights up in turn and darkens once it has passed.">
+  </picture>
+</p>
+
+<details>
+<summary>Text version</summary>
+
 ```
   [design-doc]  ←── optional, interview-driven
        │
@@ -33,6 +44,8 @@ idea, or design/plan doc in {docs-dir}/todo/
        │
      done
 ```
+
+</details>
 
 Escalation paths run in both directions — the coder can send ambiguous requirements back to
 the planner; the qa-reviewer can send bugs back to the coder; the test-writer can surface
@@ -282,6 +295,9 @@ skills/
     SKILL.md        prunes, merges and promotes lessons/memories from measured usage
     references/     verdict policy and usage-ledger format
     scripts/        transcript scanner (read-only, stdlib only)
+assets/
+  pipeline-light.svg
+  pipeline-dark.svg animated pipeline diagram, switched on prefers-color-scheme
   
 bootstrap.md        placeholder guide for setting up a new project
 ```

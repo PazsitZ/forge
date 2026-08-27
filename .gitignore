@@ -1,4 +1,7 @@
 .claude
-/docs
+/docs/changes/
+/docs/lessons/
+/docs/todo/
+/docs/workflow/
 __pycache__/
 assets/pipeline.py

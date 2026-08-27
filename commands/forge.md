@@ -198,7 +198,7 @@ After test-writer finishes, invoke the **dispatcher** subagent:
 > Task: "Read the test-writer handoff log at `{workflow-dir}/run-{ts}/test-writer.md`. Pipeline stage: post-test-writer. Available next agents: done (if pass), coder (if escalate — source bug). The log uses JSON front-matter — parse the JSON block at the top (before `---`). Return your dispatch-decision as a fenced JSON block."
 
 **Act on the dispatcher decision:**
-- `action: proceed, next: done` → pipeline complete, go to Final Summary
+- `action: proceed, next: Stage 5` → continue to Stage 5 (Documentation)
 - `action: ask_user` → present the question. If user says fix it: re-invoke coder:
   > Task: "The test-writer found a source bug. Test-writer handoff log: `{workflow-dir}/run-{ts}/test-writer.md`. Fix the source bug described. Do not modify test files. Write an updated coder handoff log."
   Then return to Stage 3.
